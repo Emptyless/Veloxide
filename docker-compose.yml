@@ -48,3 +48,11 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     restart: always
+
+  redis:
+    image: redis:latest
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"

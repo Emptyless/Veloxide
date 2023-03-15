@@ -1,15 +1,33 @@
 pub mod config;
 pub mod mysql_db_sqlx;
 pub mod postgres_db_sqlx;
+pub mod redis_config;
 pub mod tracing_config;
 
 // Re-exports
 pub use config::*;
 pub use mysql_db_sqlx::*;
 pub use postgres_db_sqlx::*;
+pub use redis_config::*;
 pub use tracing::*;
 
 use tracing::{instrument, Level};
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "postgres")] {
+        use sqlx::{Pool, Postgres};
+        pub async fn get_db_connection() -> crate::prelude::Result<Pool<Postgres>> {
+            get_db_connection_postgres_sqlx().await
+        }
+    } else if #[cfg(feature = "mysql")] {
+        use sqlx::{Pool, mysql};
+        pub async fn get_db_connection() -> crate::prelude::Result<Pool<mysql::MySql>> {
+            get_db_connection_mysql_sqlx().await
+        }
+    } else {
+        compile_error!("Must specify either mysql or postgres feature");
+    }
+}
 
 #[instrument]
 pub async fn load_app_configuration() -> crate::prelude::Result<AppConfiguration> {

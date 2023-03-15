@@ -4,6 +4,8 @@
 #![warn(clippy::all)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
+use std::sync::Arc;
+
 use axum::{routing::get, Extension, Router, Server};
 use axum_prometheus::PrometheusMetricLayer;
 use hyper::{header::CONTENT_TYPE, Method};
@@ -16,30 +18,15 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::prelude::*;
 mod error;
-use cfg_if::cfg_if;
 use dotenvy::dotenv;
 mod application;
 mod configuration;
 mod domain;
 mod prelude;
 mod presentation;
+mod state;
+use state::*;
 use tracing_log::LogTracer;
-
-cfg_if! {
-    if #[cfg(feature = "postgres")] {
-        use sqlx::{Pool, Postgres};
-        async fn get_db_connection() -> crate::prelude::Result<Pool<Postgres>> {
-            configuration::get_db_connection_postgres_sqlx().await
-        }
-    } else if #[cfg(feature = "mysql")] {
-        use sqlx::{Pool, mysql};
-        async fn get_db_connection() -> crate::prelude::Result<Pool<mysql::MySql>> {
-            configuration::get_db_connection_mysql_sqlx().await
-        }
-    } else {
-        compile_error!("Must specify either mysql or postgres feature");
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -54,10 +41,8 @@ async fn main() -> Result<()> {
         }
     };
 
-    let pool = get_db_connection().await?;
+    let pool = configuration::get_db_connection().await?;
     let (cqrs, account_query) = presentation::get_bank_account_cqrs_framework(pool);
-
-    // Set up Axum
 
     // Configure prometheus layer for Axum
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
@@ -73,6 +58,13 @@ async fn main() -> Result<()> {
     let graphql_router =
         presentation::graphql::new_graphql_router(cqrs.clone(), account_query.clone()).await;
 
+    let app_state = Arc::new(AppState {
+        google_openidconnect_client: presentation::new_google_openidconnect_client().await,
+        redis_client: configuration::new_redis_client().await?,
+    });
+
+    let auth_router = presentation::google_axum_layer::new_axum_google_auth_layer(app_state).await;
+
     // Set up the router
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
@@ -83,6 +75,7 @@ async fn main() -> Result<()> {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .nest("/graphql", graphql_router)
+        .nest("/auth", auth_router)
         .layer(
             ServiceBuilder::new()
                 .layer(Extension(cqrs.clone()))
@@ -90,6 +83,7 @@ async fn main() -> Result<()> {
                 .layer(prometheus_layer)
                 .layer(cors),
         )
+        // The /health route is deliberately after the prometheus layer so that it's hits are not recorded
         .route("/health", get(|| async move { "HEALTHY" }));
 
     // Run the router

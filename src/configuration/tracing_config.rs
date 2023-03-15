@@ -15,7 +15,8 @@ pub async fn configure_tracing() -> std::result::Result<(), crate::error::Error>
     // Create a new Jaeger tracer
     let tracer = opentelemetry_jaeger::new_agent_pipeline()
         .with_service_name(tracing_service_name)
-        .install_simple()
+        // .install_simple()
+        .install_batch(opentelemetry::runtime::Tokio)
         .expect("Expected Jaeger tracer to install successfully, regardless of whether Jaeger is running or not");
 
     // Create a tracing layer with the configured tracer
