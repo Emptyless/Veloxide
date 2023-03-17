@@ -119,3 +119,7 @@ In the Benchmarks Game's evaluation of various algorithms, Rust demonstrated sup
 Overall, Rust provides a better developer experience by providing a shorter feedback loop and more legible code, Rust code is considered more secure than any other language out there, it's more performant than just about all languages except C, and it has a vibrant community of developers who contribute to its ecosystem of libraries and tools. These factors make Rust an outstanding choice for developing secure, reliable, and performant software of any kind.
 
 Why **_wouldn't_** you choose rust for your next project?
+
+## Additional Resources
+
+- [Considering Rust](https://www.youtube.com/watch?v=DnT-LUQgc7s)
