@@ -1,0 +1,6 @@
+[alias]     # command aliases
+b = "build"
+c = "check"
+t = "test"
+rm = "run --features mysql"
+rp = "run --features postgres"
