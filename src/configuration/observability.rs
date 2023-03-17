@@ -23,8 +23,8 @@ pub async fn configure_tracing() -> std::result::Result<(), crate::error::Error>
     // Create a tracing layer with the configured tracer
     let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
 
-    // Create a new formatting layer to print to stdout
-    let formatting_layer = BunyanFormattingLayer::new(tracing_service_name.into(), std::io::stdout);
+    // Create a new formatting layer to print bunyan formatted logs to stdout, pipe into bunyan to view
+    let formatting_layer = BunyanFormattingLayer::new(tracing_service_name, std::io::stdout);
 
     // Use the tracing subscriber `Registry`, or any other subscriber
     // that impls `LookupSpan`
