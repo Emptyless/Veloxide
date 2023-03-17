@@ -43,17 +43,31 @@ sqlx = { version = "~0", features = [
 ] }
 
 # Tracing
-tracing = { version = "~0", features = ["log-always"] }
+tracing = { version = "~0", features = ["log", "log-always"] }
 opentelemetry = { version = "~0", features = ["rt-tokio"], optional = true }
 tracing-subscriber = { version = "~0", optional = true }
 opentelemetry-jaeger = { version = "~0", features = [
   "rt-tokio",
 ], optional = true }
 tracing-opentelemetry = { version = "~0", optional = true }
-tracing-log = { version = "~0", optional = true }
+tracing-log = { version = "~0", optional = true, features = ["env_logger"] }
+tracing-bunyan-formatter = { version = "~0", optional = true }
 
 # Frontend
 ts-rs = { version = "~6", optional = true }
+
+# Event sourcing
+cqrs-es = "~0"
+mysql-es = { version = "~0", optional = true}
+postgres-es = { version = "~0", optional = true}
+
+# OpenID Connect / OAuth2
+oauth2 = "~4"
+openidconnect = "~2"
+url = "~2"
+const_format = "0.2.30"
+tower-cookies = "0.9.0"
+redis = { version = "~0", features = ["tokio-comp"] }
 
 # Misc
 thiserror = "~1"
@@ -61,18 +75,13 @@ log = "~0"
 dotenvy = "~0"
 chrono = "~0"
 derivative = "~2"
-cfg-if = "1.0.0"
-
-# Event sourcing
-cqrs-es = "~0"
-mysql-es = { version = "~0", optional = true}
-postgres-es = { version = "~0", optional = true}
+cfg-if = "~1"
 
 [features]
-default = ["tracing", "graphql", "frontend", "mysql"]
+default = ["tracing", "graphql", "frontend", "postgres"]
 mysql = ["mysql-es", "sqlx/mysql"]
 postgres = ["postgres-es", "sqlx/postgres"]
-tracing = ["tracing-log", "tracing-subscriber", "tracing-opentelemetry", "opentelemetry", "opentelemetry-jaeger"]
+tracing = ["tracing-log", "tracing-subscriber", "tracing-opentelemetry", "opentelemetry", "opentelemetry-jaeger", "tracing-bunyan-formatter"]
 graphql = ["async-graphql", "async-graphql-axum"]
 frontend = ["ts-rs"]
 

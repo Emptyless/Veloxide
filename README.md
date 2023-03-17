@@ -55,7 +55,7 @@ Further documentation on the design and implementation of Veloxide be found in t
 | GraphQL | [async-graphql](https://docs.rs/async-graphql/latest/async_graphql/), [async-graphql-axum](https://docs.rs/async-graphql-axum/5.0.6/async_graphql_axum/)  |
 | OpenAPI Doc Generation                                    | [Utopia](https://docs.rs/utoipa/latest/utoipa/)                                                                                                                                                                                                                               | Serves interactive documentation at `/swagger-ui`                                                                             |
 | Async Runtime                                             | [Tokio](https://docs.rs/tokio/latest/tokio/index.html)                                                                                                                                                                                                                        |                                                                                                                               |
-| Tracing                                                   | [Tracing](https://docs.rs/tracing/latest/tracing/) & [Tracing OpenTelemetry](https://docs.rs/tracing-opentelemetry/latest/) & [OpenTelemetry-Jaeger](https://docs.rs/opentelemetry-jaeger/latest/) & [Tracing Log](https://docs.rs/tracing-log/latest/tracing_log/index.html) | Use the [`#[instrument]`](https://docs.rs/tracing/latest/tracing/attr.instrument.html) macro to automatically generate new spans whenever a function is called! Also, all logs are automatically embedded in Trace spans by default! Has tracing ever been this easy?                                                                               |
+| Tracing                                                   | [Tracing](https://docs.rs/tracing/latest/tracing/) & [Tracing OpenTelemetry](https://docs.rs/tracing-opentelemetry/latest/) & [OpenTelemetry-Jaeger](https://docs.rs/opentelemetry-jaeger/latest/) & [Tracing Log](https://docs.rs/tracing-log/latest/tracing_log/index.html) & [tracing-bunyan-formatter](https://docs.rs/tracing-bunyan-formatter/0.3.6/tracing_bunyan_formatter/) | Use the [`#[instrument]`](https://docs.rs/tracing/latest/tracing/attr.instrument.html) macro to automatically generate new spans whenever a function is called! Also, all logs are automatically embedded in Trace spans by default!                                                                               |
 | Metrics                                                   | [Axum Prometheus](https://docs.rs/axum-prometheus/latest/axum_prometheus/)                                                                                                                                                                                                    | Metrics are pre-configured for collection at /metrics                                                                         |
 | Serializing & Deserializing                               | [Serde](https://docs.rs/serde/latest/serde/index.html) ([yaml](https://docs.rs/serde_yaml/latest/serde_yaml/) & [json](https://docs.rs/serde_json/latest/serde_json/))                                                                                                        |                                                                                                                               |
 | Command Query Responsibility Segregation & Event Sourcing | [cqrs-es](https://docs.rs/cqrs-es/latest/cqrs_es/)                                                                                                                                                                                                                            |                                                                                                                               |
@@ -68,6 +68,7 @@ Further documentation on the design and implementation of Veloxide be found in t
 | Supercharged derive attributes                            | [Derivative](https://mcarton.github.io/rust-derivative/latest/index.html)                                                                                                                                                                                                     |
 | Code coverage generation | [cargo-llmvm-cov](https://github.com/taiki-e/cargo-llvm-cov) | |
 | Automatic Typescript Binding Generation | [ts-rs](https://docs.rs/ts-rs/latest/ts_rs) | Automatically generates TypeScript interfaces for your Rust view models! |
+| Authentication using OpenID Connect | [openidconnect-rs](https://docs.rs/openidconnect/latest/openidconnect/) | Log in with Google (other providers to come) |
 
 ### Supporting containers
 
@@ -80,14 +81,13 @@ Veloxide comes pre-configured with the following supporting containers found in 
 - **[Envoy](https://www.envoyproxy.io/)**: Coming soon.
 - **[Open Policy Agent](https://www.openpolicyagent.org/)**: Coming soon.
 
-Note that using the supporting containers is optional if you change the veloxide-config.yaml to use the memory database instead of postgres.
-
 ## Getting started
 
 Install the pre-requisites:
 
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Docker](https://docs.docker.com/get-docker/)
+- [just](https://github.com/casey/just)
 
 Install the Veloxide CLI:
 
@@ -104,10 +104,10 @@ To create your own app:
 > cd my-app
 
 # Install tools
-> make tools.required
+> just install-required
 
 # Start the supporting containers, followed by the build process
-> make dev
+> just dev
 
 # Once done, open `my-app/` in your IDE
 
@@ -115,7 +115,7 @@ To create your own app:
 ```
 
 - The OpenAPI interactive documentation is available at `http://localhost:8080/swagger-ui/`
-- GraphQL Playground is available at `http://localhost:9000/`
+- GraphQL Playground is available at `http://localhost:8080/graphql`
 
 ## Why the name?
 

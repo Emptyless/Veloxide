@@ -7,6 +7,9 @@
 //!     - By best practices, `anyhow` is not used in application code, but can be used in unit or integration test (will be in dev_dependencies when used)
 //!
 
+use axum::response::{IntoResponse, Response};
+use hyper::StatusCode;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Generic: {0}")]
@@ -26,6 +29,37 @@ pub enum Error {
 
     #[error(transparent)]
     ParseIntError(#[from] std::num::ParseIntError),
+
+    #[error("no email found in claims")]
+    NoEmail,
+
+    #[error("no name found in claims")]
+    NoName,
+
+    #[error("no id token found in claims")]
+    NoIdToken,
+
+    #[error("code exchange failed")]
+    CodeExchangeFailed,
+
+    #[error(transparent)]
+    RedisError(#[from] redis::RedisError),
+
+    #[error("invalid state")]
+    InvalidState,
+
+    #[error(transparent)]
+    ClaimsVerificationError(#[from] openidconnect::ClaimsVerificationError),
+}
+
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        let body = match self {
+            Error::Generic(msg) => msg,
+            _ => self.to_string(),
+        };
+        (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+    }
 }
 
 #[cfg(test)]

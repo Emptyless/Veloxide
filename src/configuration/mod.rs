@@ -1,12 +1,12 @@
 pub mod config;
-pub mod mysql_db_sqlx;
-pub mod postgres_db_sqlx;
-pub mod tracing_config;
+pub mod db_connection;
+pub mod observability;
+pub mod redis_connection;
 
 // Re-exports
 pub use config::*;
-pub use mysql_db_sqlx::*;
-pub use postgres_db_sqlx::*;
+pub use db_connection::*;
+pub use redis_connection::*;
 pub use tracing::*;
 
 use tracing::{instrument, Level};
@@ -23,14 +23,6 @@ pub async fn load_app_configuration() -> crate::prelude::Result<AppConfiguration
         serde_yaml::from_reader(f).expect("Could not read values.");
 
     Ok(application_config)
-}
-
-#[instrument]
-async fn get_database_environment_variable() -> String {
-    tracing::event!(Level::INFO, "getting database environment variable");
-    let db_url = dotenvy::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    tracing::event!(Level::INFO, "database environment variable set: {db_url}");
-    db_url
 }
 
 #[instrument]
@@ -52,13 +44,6 @@ pub async fn get_configuration_file_path_variable(
 mod tests {
     use super::*;
     use std::env;
-
-    #[tokio::test]
-    async fn test_get_database_environment_variable() {
-        env::set_var("DATABASE_URL", "test");
-        let db_connection_url = get_database_environment_variable().await;
-        assert_eq!(db_connection_url, "test");
-    }
 
     #[tokio::test]
     async fn test_get_configuration_file_path_variable() {

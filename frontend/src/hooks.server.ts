@@ -1,13 +1,16 @@
 /* eslint-disable */
 // @ts-nocheck
 import { SvelteKitAuth } from "@auth/sveltekit"
-import GitHub from '@auth/core/providers/github';
-import GoogleProvider from '@auth/core/providers/google';
 import { sequence } from '@sveltejs/kit/hooks';
 import { redirect, type Handle } from '@sveltejs/kit';
-import { GITHUB_ID, GITHUB_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "$env/static/private"
+import { GITHUB_ID, GITHUB_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, EMAIL_SERVER, EMAIL_FROM } from "$env/static/private"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
+
+import GitHub from '@auth/core/providers/github';
+import GoogleProvider from '@auth/core/providers/google';
+import EmailProvider from "@auth/core/providers/email";
+
 
 const prisma = new PrismaClient()
 
@@ -28,7 +31,7 @@ async function authorization({ event, resolve }) {
 }
 
 export const handle: Handle = sequence(SvelteKitAuth({
-  adapter: PrismaAdapter(prisma) as Adapter<boolean>,
+  adapter: PrismaAdapter(prisma),
   // the session override fixes a weird bug in the adapter
   // src: https://github.com/nextauthjs/next-auth/issues/6076#issuecomment-1354087465
   session: {
@@ -41,7 +44,12 @@ export const handle: Handle = sequence(SvelteKitAuth({
     GitHub({ clientId: GITHUB_ID, clientSecret: GITHUB_SECRET }),
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET
-    })
+      clientSecret: GOOGLE_CLIENT_SECRET,
+    }),
+    EmailProvider({
+      server: EMAIL_SERVER,
+      from: EMAIL_FROM,
+    }
+    )
   ]
 }), authorization);

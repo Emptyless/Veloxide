@@ -1,2 +1,3 @@
-export const ssr = true;
-export const prerender = true;
+export const ssr = false;
+export const prerender = false;
+import "@total-typescript/ts-reset";

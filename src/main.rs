@@ -16,36 +16,20 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::prelude::*;
 mod error;
-use cfg_if::cfg_if;
 use dotenvy::dotenv;
 mod application;
 mod configuration;
 mod domain;
 mod prelude;
 mod presentation;
+mod state;
 use tracing_log::LogTracer;
-
-cfg_if! {
-    if #[cfg(feature = "postgres")] {
-        use sqlx::{Pool, Postgres};
-        async fn get_db_connection() -> crate::prelude::Result<Pool<Postgres>> {
-            configuration::get_db_connection_postgres_sqlx().await
-        }
-    } else if #[cfg(feature = "mysql")] {
-        use sqlx::{Pool, mysql};
-        async fn get_db_connection() -> crate::prelude::Result<Pool<mysql::MySql>> {
-            configuration::get_db_connection_mysql_sqlx().await
-        }
-    } else {
-        compile_error!("Must specify either mysql or postgres feature");
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
     LogTracer::init()?;
-    match configuration::tracing_config::configure_tracing().await {
+    match configuration::observability::configure_tracing().await {
         Ok(_) => {
             tracing::debug!("tracing subscriber set");
         }
@@ -54,10 +38,8 @@ async fn main() -> Result<()> {
         }
     };
 
-    let pool = get_db_connection().await?;
+    let pool = configuration::get_db_connection().await?;
     let (cqrs, account_query) = presentation::get_bank_account_cqrs_framework(pool);
-
-    // Set up Axum
 
     // Configure prometheus layer for Axum
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
@@ -90,6 +72,7 @@ async fn main() -> Result<()> {
                 .layer(prometheus_layer)
                 .layer(cors),
         )
+        // The /health route is deliberately after the prometheus layer so that it's hits are not recorded
         .route("/health", get(|| async move { "HEALTHY" }));
 
     // Run the router
