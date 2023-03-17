@@ -78,7 +78,7 @@ derivative = "~2"
 cfg-if = "~1"
 
 [features]
-default = ["tracing", "graphql", "frontend"]
+default = ["tracing", "graphql", "frontend", "postgres"]
 mysql = ["mysql-es", "sqlx/mysql"]
 postgres = ["postgres-es", "sqlx/postgres"]
 tracing = ["tracing-log", "tracing-subscriber", "tracing-opentelemetry", "opentelemetry", "opentelemetry-jaeger", "tracing-bunyan-formatter"]
