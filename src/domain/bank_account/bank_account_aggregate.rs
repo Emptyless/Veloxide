@@ -123,12 +123,12 @@ impl BankAccount {
             return Err(BankAccountError::AccountNotOpen);
         }
         if amount < 0_f64 {
-            error!("cannot withdraw negative amount");
+            tracing::error!("cannot withdraw negative amount");
             return Err(BankAccountError::CannotWithdrawNegativeAmount);
         }
         let balance = self.balance - amount;
         if balance < 0_f64 {
-            error!("insufficient funds");
+            tracing::error!("insufficient funds");
             return Err(BankAccountError::InsufficientFunds);
         }
         if services
@@ -137,7 +137,7 @@ impl BankAccount {
             .await
             .is_err()
         {
-            error!("atm rule violation");
+            tracing::error!("atm rule violation");
             return Err(BankAccountError::AtmRuleViolation);
         };
         Ok(vec![BankAccountEvent::CustomerWithdrewCash {
@@ -157,12 +157,12 @@ impl BankAccount {
             return Err(BankAccountError::AccountNotOpen);
         }
         if amount < 0_f64 {
-            error!("cannot write negative check amount");
+            tracing::error!("cannot write negative check amount");
             return Err(BankAccountError::CannotWriteNegativeCheckAmount);
         }
         let balance = self.balance - amount;
         if balance < 0_f64 {
-            error!("insufficient funds");
+            tracing::error!("insufficient funds");
             return Err(BankAccountError::InsufficientFunds);
         }
         if services
@@ -171,7 +171,7 @@ impl BankAccount {
             .await
             .is_err()
         {
-            error!("invalid check");
+            tracing::error!("invalid check");
             return Err(BankAccountError::InvalidCheck);
         };
         Ok(vec![BankAccountEvent::CustomerWroteCheck {

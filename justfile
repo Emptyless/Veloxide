@@ -10,7 +10,7 @@ lint:
 # Run the application supporting containers, then run the binary
 dev features="postgres":
 	docker-compose up -d
-	cargo run --features {{features}}
+	cargo run --features {{features}} | bunyan
 
 # Stop the containers in docker (this stops the docker stack)
 stop:
@@ -37,6 +37,9 @@ install-required:
 
 	@echo "Installing sqlx-cli (database migrations: https://crates.io/crates/sqlx-cli)"
 	cargo install sqlx-cli --no-default-features --features postgres,mysql,sqlite,rustls
+
+	@echo "Installing bunyan (JSON log viewer: https://github.com/LukeMathWalker/bunyan)"
+	cargo install bunyan
 
 	@echo "Installing tools...Done"
 

@@ -4,8 +4,6 @@
 #![warn(clippy::all)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
-use std::sync::Arc;
-
 use axum::{routing::get, Extension, Router, Server};
 use axum_prometheus::PrometheusMetricLayer;
 use hyper::{header::CONTENT_TYPE, Method};
@@ -25,14 +23,13 @@ mod domain;
 mod prelude;
 mod presentation;
 mod state;
-use state::*;
 use tracing_log::LogTracer;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
     LogTracer::init()?;
-    match configuration::tracing_config::configure_tracing().await {
+    match configuration::observability::configure_tracing().await {
         Ok(_) => {
             tracing::debug!("tracing subscriber set");
         }
@@ -58,13 +55,6 @@ async fn main() -> Result<()> {
     let graphql_router =
         presentation::graphql::new_graphql_router(cqrs.clone(), account_query.clone()).await;
 
-    let app_state = Arc::new(AppState {
-        google_openidconnect_client: presentation::new_google_openidconnect_client().await,
-        redis_client: configuration::new_redis_client().await?,
-    });
-
-    let auth_router = presentation::google_axum_layer::new_axum_google_auth_layer(app_state).await;
-
     // Set up the router
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
@@ -75,7 +65,6 @@ async fn main() -> Result<()> {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .nest("/graphql", graphql_router)
-        .nest("/auth", auth_router)
         .layer(
             ServiceBuilder::new()
                 .layer(Extension(cqrs.clone()))
