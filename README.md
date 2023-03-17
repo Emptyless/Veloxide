@@ -81,14 +81,13 @@ Veloxide comes pre-configured with the following supporting containers found in 
 - **[Envoy](https://www.envoyproxy.io/)**: Coming soon.
 - **[Open Policy Agent](https://www.openpolicyagent.org/)**: Coming soon.
 
-Note that using the supporting containers is optional if you change the veloxide-config.yaml to use the memory database instead of postgres.
-
 ## Getting started
 
 Install the pre-requisites:
 
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Docker](https://docs.docker.com/get-docker/)
+- [just](https://github.com/casey/just)
 
 Install the Veloxide CLI:
 
@@ -105,10 +104,10 @@ To create your own app:
 > cd my-app
 
 # Install tools
-> make tools.required
+> just install-required
 
 # Start the supporting containers, followed by the build process
-> make dev
+> just dev
 
 # Once done, open `my-app/` in your IDE
 
@@ -116,7 +115,7 @@ To create your own app:
 ```
 
 - The OpenAPI interactive documentation is available at `http://localhost:8080/swagger-ui/`
-- GraphQL Playground is available at `http://localhost:9000/`
+- GraphQL Playground is available at `http://localhost:8080/graphql`
 
 ## Why the name?
 
