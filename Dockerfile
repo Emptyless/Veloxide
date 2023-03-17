@@ -14,7 +14,9 @@ WORKDIR ./${APP_NAME}
 
 COPY . ./
 
-RUN cargo build --release
+ARG DATABASE_KIND="mysql"
+
+RUN cargo build --release --features ${DATABASE_KIND}
 
 ############################
 # STAGE 2 build a small image
