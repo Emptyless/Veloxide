@@ -20,7 +20,7 @@ Consequently, using GraphQL can lead to faster, more efficient, and more flexibl
 
 ## GraphQL in Veloxide
 
-Veloxide implements a iGraphQL web interface on `http://localhost:9000` by default. This interface allows you to explore the GraphQL schema and execute queries against the API.
+Veloxide implements a iGraphQL web interface on `http://localhost:8080/graphql` by default. This interface allows you to explore the GraphQL schema and execute queries against the API.
 
 ### Examples
 

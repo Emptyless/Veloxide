@@ -1,0 +1,301 @@
+{
+	"info": {
+		"_postman_id": "626e35e4-1f7a-423d-8766-a1b376ffce15",
+		"name": "veloxide-demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9572547"
+	},
+	"item": [
+		{
+			"name": "Commands",
+			"item": [
+				{
+					"name": "command - OpenAccount",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"account_id\", \"ACCT-\" + (Math.random().toString(16)+\"000000000\").substr(2,8));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"OpenAccount\": {\n        \"account_id\": \"{{account_id}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3030/account/{{account_id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "3030",
+							"path": [
+								"account",
+								"{{account_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "command - DepositMoney",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"DepositMoney\": {\n        \"amount\": 1000.0\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3030/account/{{account_id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "3030",
+							"path": [
+								"account",
+								"{{account_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "command - WithdrawMoney",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"WithdrawMoney\": {\n        \"atm_id\": \"ATM-N468290\",\n        \"amount\": 400.0\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3030/account/{{account_id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "3030",
+							"path": [
+								"account",
+								"{{account_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "command - WriteCheck",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"WriteCheck\": {\n        \"check_number\": \"1170\",\n        \"amount\": 256.28\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3030/account/{{account_id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "3030",
+							"path": [
+								"account",
+								"{{account_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Queries",
+			"item": [
+				{
+					"name": "query - Bank Account",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"amount\": 1000.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/bank-accounts/{{account_id}}",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"bank-accounts",
+								"{{account_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Monitoring",
+			"item": [
+				{
+					"name": "healthcheck",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{host}}:{{port}}/health",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{port}}/metrics",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"metrics"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GraphQL-Mutations",
+			"item": [
+				{
+					"name": "bankAccountMutation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation bankAccountMutation($id: String!, $command: BankAccountCommand!) {\n  bankAccountMutation(id: $id, command: $command) {\n    __typename\n    accountId\n    balance\n    writtenChecks\n    # accountTransactions\n  }\n}",
+								"variables": "{\n\t\"id\": null,\n\t\"command\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Issue a command on the bank account aggregate"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GraphQL-Queries",
+			"item": [
+				{
+					"name": "bankAccountQuery",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query bankAccountQuery($id: String!) {\n  bankAccountQuery(id: $id) {\n    __typename\n    accountId\n    balance\n    writtenChecks\n    # accountTransactions\n  }\n}",
+								"variables": "{\n\t\"id\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Get a bank account by its ID"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "account_id",
+			"value": "123"
+		},
+		{
+			"key": "host",
+			"value": "localhost"
+		},
+		{
+			"key": "port",
+			"value": "8080"
+		}
+	]
+}

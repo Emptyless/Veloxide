@@ -2,5 +2,11 @@
 b = "build"
 c = "check"
 t = "test"
-rm = "run --features mysql"
-rp = "run --features postgres"
+
+prisma = "run -p prisma-cli --"
+
+rm = "run -p veloxide-server --features mysql"
+mysql = "run -p veloxide-server --features mysql"
+
+rp = "run -p veloxide-server --features postgres"
+postgres = "run -p veloxide-server --features postgres"

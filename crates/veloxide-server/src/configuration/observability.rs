@@ -1,6 +1,8 @@
 use tracing::instrument;
-use tracing_bunyan_formatter::BunyanFormattingLayer;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+
+#[cfg(feature = "bunyan")]
+use tracing_bunyan_formatter::BunyanFormattingLayer;
 
 #[instrument]
 pub async fn configure_tracing() -> std::result::Result<(), crate::error::Error> {
@@ -23,14 +25,20 @@ pub async fn configure_tracing() -> std::result::Result<(), crate::error::Error>
     // Create a tracing layer with the configured tracer
     let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
 
-    // Create a new formatting layer to print bunyan formatted logs to stdout, pipe into bunyan to view
-    let formatting_layer = BunyanFormattingLayer::new(tracing_service_name, std::io::stdout);
-
     // Use the tracing subscriber `Registry`, or any other subscriber
     // that impls `LookupSpan`
-    let subscriber = tracing_subscriber::Registry::default()
-        .with(formatting_layer)
-        .with(telemetry);
+    cfg_if::cfg_if! {
+        if #[cfg(feature="bunyan")] {
+            // Create a new formatting layer to print bunyan formatted logs to stdout, pipe into bunyan to view
+            let formatting_layer = BunyanFormattingLayer::new(tracing_service_name, std::io::stdout);
+            let subscriber = tracing_subscriber::Registry::default()
+                .with(formatting_layer)
+                .with(telemetry);
+        } else {
+            let subscriber = tracing_subscriber::Registry::default()
+                .with(telemetry);
+        }
+    }
 
     Ok(tracing::subscriber::set_global_default(subscriber)?)
 }

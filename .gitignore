@@ -47,5 +47,11 @@ coverage/*
 
 fly.toml
 
-crates/db/
 veloxide-frontend/
+
+.bacon.toml
+
+/crates/db/src/prisma.rs
+
+# Book
+/docs/guide/book

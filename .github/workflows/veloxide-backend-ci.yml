@@ -6,6 +6,8 @@ on:
       - "docs/**"
       - "**.md"
       - "frontend/**"
+    branches-ignore:
+      - "gh-pages"
   pull_request:
     branches:
       - main
@@ -32,6 +34,9 @@ jobs:
           override: true
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Generate prisma.rs
+        run: cargo prisma generate
 
       - uses: actions-rs/cargo@v1
         with:
@@ -70,6 +75,9 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Generate prisma.rs
+        run: cargo prisma generate
+
       - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
@@ -93,6 +101,9 @@ jobs:
           override: true
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Generate prisma.rs
+        run: cargo prisma generate
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
@@ -118,6 +129,9 @@ jobs:
           components: rustfmt, clippy
 
       - uses: Swatinem/rust-cache@v2
+
+      - name: Generate prisma.rs
+        run: cargo prisma generate
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1

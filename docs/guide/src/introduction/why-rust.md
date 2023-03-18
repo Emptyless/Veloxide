@@ -6,7 +6,7 @@
 
 Rust's compiler shrinks the feedback loop between writing code and seeing the results. This makes it easy to iterate quickly and experiment with new ideas.
 
-![value-delivery-feedback-loops](./.assets/value-delivery-feedback-loops.png)
+![value-delivery-feedback-loops](../images/value-delivery-feedback-loops.png)
 
 ## Metaprogramming with Macros
 
@@ -110,9 +110,9 @@ When evaluating the performance of programming languages, individual benchmarks 
 
 In the Benchmarks Game's evaluation of various algorithms, Rust demonstrated superior optimization compared to Go. The most optimized Rust code outperformed the most optimized Go code by at least 30% across all tested algorithms, with some benchmarks showing even greater differences. For instance, in the binary-trees benchmark, Rust's most optimized code was 12 times faster than Go's. Additionally, in many cases, even the least optimized Rust code was faster than the most optimized Go code.
 
-![binary-trees](./.assets/benchmark-game-binary-trees.png)
+![binary-trees](../images/benchmark-game-binary-trees.png)
 
-![pidigits](./.assets/benchmark-game-pidigits.png)
+![pidigits](../images/benchmark-game-pidigits.png)
 
 ## Conclusion
 

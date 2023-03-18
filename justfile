@@ -1,16 +1,40 @@
+set dotenv-load := true
+
 # Show available commands
 default:
   @just --list --justfile {{justfile()}}
 
-# Perform linting. It is advised to lint in your IDE instead of running this command.
-lint:
-	@echo "It is advised to lint in your IDE instead of running this command"
-	cargo clippy
-
 # Run the application supporting containers, then run the binary
-dev features="postgres":
+dev:
 	docker-compose up -d
-	cargo run --features {{features}} | bunyan
+	cargo prisma db push
+	cargo run -p veloxide-server | bunyan
+
+# Set the configuration to use postgres, then run the application supporting containers, then run the binary
+dev-postgres: set-postgres dev
+
+# Set the configuration to use mysql, then run the application supporting containers, then run the binary
+dev-mysql: set-mysql dev
+
+[private]
+set-db db:
+	ruplacer 'default = \["tracing", "graphql", "frontend", "(postgres|mysql)", "openapi", "bunyan"\]' 'default = ["tracing", "graphql", "frontend", "{{db}}", "openapi", "bunyan"]' crates/veloxide-server/Cargo.toml --go
+	ruplacer 'provider(.*?)= "(postgres|mysql)"' 'provider$1= "{{db}}"' prisma/schema.prisma --go
+	ruplacer '(postgres|mysql)' {{db}} bacon.toml --go
+	@echo "Default database in Cargo.toml set to {{db}}"
+	@echo "Prisma database set to {{db}}, please ensure your DATABASE_URL is correct"
+
+# Set the database to mysql
+set-mysql: (set-db "mysql")
+	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$MYSQL_DATABASE_URL .env --go
+	@echo "DATABASE_URL set to MYSQL_DATABASE_URL"
+	cargo prisma generate
+
+# Set the database to postgres
+set-postgres: (set-db "postgres")
+	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$POSTGRES_DATABASE_URL .env --go
+	@echo "DATABASE_URL set to POSTGRES_DATABASE_URL"
+	cargo prisma generate
 
 # Stop the containers in docker (this stops the docker stack)
 stop:
@@ -41,6 +65,12 @@ install-required:
 	@echo "Installing bunyan (JSON log viewer: https://github.com/LukeMathWalker/bunyan)"
 	cargo install bunyan
 
+	@echo "Installing ruplacer (replacement tool: https://github.com/your-tools/ruplacer)"
+	cargo install ruplacer
+
+	@echo "Installing mdbook (book tool: https://github.com/rust-lang/mdBook)"
+	cargo install mdbook
+
 	@echo "Installing tools...Done"
 
 # Install recommended tooling that isn't required
@@ -57,3 +87,7 @@ install-recommended:
 
 # Install both the required and recommended tools
 install-all: install-required install-recommended
+
+# Opens the user guide in your browser
+watch-guide:
+	mdbook watch ./docs/guide --open

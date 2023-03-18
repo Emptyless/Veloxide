@@ -4,6 +4,8 @@
 #![warn(clippy::all)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
+use std::sync::Arc;
+
 use axum::{routing::get, Extension, Router, Server};
 use axum_prometheus::PrometheusMetricLayer;
 use hyper::{header::CONTENT_TYPE, Method};
@@ -44,6 +46,13 @@ async fn main() -> Result<()> {
     // Configure prometheus layer for Axum
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
+    // Set up the Prisma client
+    let prisma_client = Arc::new(
+        db::new_client()
+            .await
+            .expect("Failed to create prisma client"),
+    );
+
     // Configure CORS middleware for axum
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST])
@@ -64,6 +73,7 @@ async fn main() -> Result<()> {
                 .post(presentation::bank_account::command_handler),
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
+        .layer(Extension(prisma_client))
         .nest("/graphql", graphql_router)
         .layer(
             ServiceBuilder::new()

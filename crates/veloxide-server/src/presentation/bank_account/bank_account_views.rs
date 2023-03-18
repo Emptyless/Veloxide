@@ -1,4 +1,7 @@
+#[cfg(feature = "graphql")]
 use async_graphql::SimpleObject;
+
+#[cfg(feature = "frontend")]
 use ts_rs::TS;
 
 use super::*;
@@ -6,24 +9,23 @@ use super::*;
 cfg_if::cfg_if! {
     if #[cfg(feature = "postgres")] {
 
-// Our second query, this one will be handled with Postgres `GenericQuery`
-// which will serialize and persist our view after it is updated. It also
-// provides a `load` method to deserialize the view on request.
-pub type AccountQuery = GenericQuery<
-PostgresViewRepository<BankAccountView, BankAccount>,
-BankAccountView,
-BankAccount,
->;
+        // Our second query, this one will be handled with Postgres `GenericQuery`
+        // which will serialize and persist our view after it is updated. It also
+        // provides a `load` method to deserialize the view on request.
+        pub type AccountQuery = GenericQuery<
+        PostgresViewRepository<BankAccountView, BankAccount>,
+        BankAccountView,
+        BankAccount,
+        >;
     } else if #[cfg(feature = "mysql")] {
-
-// Our second query, this one will be handled with Mysql `GenericQuery`
-// which will serialize and persist our view after it is updated. It also
-// provides a `load` method to deserialize the view on request.
-pub type AccountQuery = GenericQuery<
-    MysqlViewRepository<BankAccountView, BankAccount>,
-    BankAccountView,
-    BankAccount,
->;
+        // Our second query, this one will be handled with Mysql `GenericQuery`
+        // which will serialize and persist our view after it is updated. It also
+        // provides a `load` method to deserialize the view on request.
+        pub type AccountQuery = GenericQuery<
+            MysqlViewRepository<BankAccountView, BankAccount>,
+            BankAccountView,
+            BankAccount,
+        >;
 } else {
         compile_error!("Must specify either mysql or postgres feature");
     }
@@ -32,7 +34,10 @@ pub type AccountQuery = GenericQuery<
 // The view for a BankAccount query, for a standard http application this should
 // be designed to reflect the response dto that will be returned to a user.
 
-#[derive(SimpleObject, Debug, Default, Serialize, Deserialize, ToSchema, ToResponse, TS)]
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(ToResponse, ToSchema))]
+#[cfg_attr(feature = "graphql", derive(SimpleObject))]
+#[cfg_attr(feature = "frontend", derive(TS))]
 #[ts(export, export_to = "frontend/src/bindings/")]
 #[ts(export)]
 pub struct BankAccountView {
@@ -78,7 +83,10 @@ impl View<BankAccount> for BankAccountView {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse, SimpleObject, TS)]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(ToResponse, ToSchema))]
+#[cfg_attr(feature = "graphql", derive(SimpleObject))]
+#[cfg_attr(feature = "frontend", derive(TS))]
 #[ts(export, export_to = "frontend/src/bindings/")]
 pub struct AccountTransaction {
     description: String,

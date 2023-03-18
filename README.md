@@ -2,32 +2,32 @@
 <!-- markdownlint-disable MD041 -->
 
 <p align="center">
-    <a href="https://github.com/liamwh/Veloxide"><img src="./docs/.assets/Veloxide-Wordmark-FullBanner.jpg" alt="Veloxide"
+    <a href="https://github.com/liamwh/Veloxide"><img src="./docs/guide/src/images/Veloxide-Wordmark-FullBanner.jpg" alt="Veloxide"
             width=100%></a>
     <p align="center">
     </p>
     <p align="center">
         <a href="https://github.com/liamwh/veloxide/actions?query=workflow%3AVeloxide-ci+event%3Apush+branch%3Amain">
-            <img src="https://github.com/liamwh/veloxide/workflows/veloxide-ci/badge.svg?event=push&branch=main">
-        </a>
-        <a href="https://codecov.io/gh/liamwh/veloxide">
-            <img src="https://codecov.io/gh/liamwh/veloxide/branch/main/graph/badge.svg?token=CFVJ2XAMNL" />
+            <img src="https://img.shields.io/github/actions/workflow/status/liamwh/veloxide/veloxide-backend-ci.yml?style=flat-square">
         </a>
         <a href="https://blog.rust-lang.org/2022/11/03/Rust-1.65.0.html">
-            <img src="https://img.shields.io/badge/rustc-1.65+-success.svg"></a>
+            <img src="https://img.shields.io/badge/rustc-1.65+-success.svg?style=flat-square"></a>
         <a href="https://github.com/rust-secure-code/safety-dance/">
-            <img src="https://img.shields.io/badge/unsafe-forbidden-success.svg" />
+            <img src="https://img.shields.io/badge/unsafe-forbidden-success.svg?style=flat-square" />
+        </a>
+        <a href="https://guide.veloxide.org">
+            <img src="https://img.shields.io/badge/docs-latest-success.svg?style=flat-square" />
         </a>
         <a href="https://github.com/liamwh/veloxide/blob/main/README.md">
-            <img src="https://img.shields.io/badge/License-MIT-success.svg">
+            <img src="https://img.shields.io/badge/License-MIT-success.svg?style=flat-square">
         </a>
     </p>
 
 ---
 
-Veloxide is a modern, high-performance, cloud-native web API template written in Rust.
+Veloxide is the solution for anyone looking to simplify the process of developing a quality web API. Say goodbye to overwhelming decision fatigue and hello to focusing on what really matters: delivering value to your consumers. With Veloxide, you'll enjoy an easy-to-use, opinionated, batteries-included, and lightning-fast technology stack that is prepared to be "plugged-in" with your business logic. Use Veloxide and experience how it transforms the way you develop and deploy your API. Get ready to experience the ultimate ease and efficiency in API development with Veloxide!
 
-The key features are:
+Its key qualities are:
 
 - **Fast to code**: Veloxide increases the speed of development by being simple, flexible and easy to use. Rust naturally [shifts bugs left](https://en.wikipedia.org/wiki/Shift-left_testing) to the compiler, so less time is spent debugging code, and more time is spent delivering value.
 - **Fewer bugs**: All components of Veloxide are written in [Rust](https://www.rust-lang.org), which is known for its safety and reliability [[1]](https://www.infoq.com/news/2021/04/rust-linux-kernel-development/) [[2]](https://security.googleblog.com/2023/01/supporting-use-of-rust-in-chromium.html) [[3]](https://security.googleblog.com/2022/12/memory-safe-languages-in-android-13.html)
@@ -37,49 +37,11 @@ The key features are:
 
 ## Design Patterns
 
-Veloxide implements the following design patterns to support maintainability and flexibility:
+Veloxide comes pre-configured with the following design patterns to support maintainability and flexibility:
 
 - **[CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)**: Veloxide uses Command Query Responsibility Segregation (CQRS) to help simplify and optimize the design by separating the read (view) and write (command) models.
 - **[Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)**: Veloxide uses Event Sourcing to persist domain events to the database. Event sourcing is used to tie the read and write models together, as well as providing a complete and accurate audit trail of changes made to a system, which can be useful for debugging, compliance, and various other purposes.
-- **[Layered Architecture](https://en.wikipedia.org/wiki/Multitier_architecture)**: The codebase is divided into layers, each with a specific responsibility, as per the principles of [Domain-Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design). This makes the application easier to understand and maintain.
-
-Further documentation on the design and implementation of Veloxide be found in the [/docs folder](https://github.com/liamwh/veloxide/tree/main/docs).
-
-## What's included?
-
-### Key Components
-
-| Component                                                   | Crate(s) of Significance                                                                                                                                                                                                                                                      | Notes                                                                                                                         |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Web Server                                                | [Axum](https://docs.rs/axum/latest/axum/), [Tower](https://docs.rs/tower/0.4.13/tower/)                                                                                                                                                                                                                                     | The endpoint path and timestamp metadata for each issued command are captured and stored in the database in the events table. |
-| GraphQL | [async-graphql](https://docs.rs/async-graphql/latest/async_graphql/), [async-graphql-axum](https://docs.rs/async-graphql-axum/5.0.6/async_graphql_axum/)  |
-| OpenAPI Doc Generation                                    | [Utopia](https://docs.rs/utoipa/latest/utoipa/)                                                                                                                                                                                                                               | Serves interactive documentation at `/swagger-ui`                                                                             |
-| Async Runtime                                             | [Tokio](https://docs.rs/tokio/latest/tokio/index.html)                                                                                                                                                                                                                        |                                                                                                                               |
-| Tracing                                                   | [Tracing](https://docs.rs/tracing/latest/tracing/) & [Tracing OpenTelemetry](https://docs.rs/tracing-opentelemetry/latest/) & [OpenTelemetry-Jaeger](https://docs.rs/opentelemetry-jaeger/latest/) & [Tracing Log](https://docs.rs/tracing-log/latest/tracing_log/index.html) & [tracing-bunyan-formatter](https://docs.rs/tracing-bunyan-formatter/0.3.6/tracing_bunyan_formatter/) | Use the [`#[instrument]`](https://docs.rs/tracing/latest/tracing/attr.instrument.html) macro to automatically generate new spans whenever a function is called! Also, all logs are automatically embedded in Trace spans by default!                                                                               |
-| Metrics                                                   | [Axum Prometheus](https://docs.rs/axum-prometheus/latest/axum_prometheus/)                                                                                                                                                                                                    | Metrics are pre-configured for collection at /metrics                                                                         |
-| Serializing & Deserializing                               | [Serde](https://docs.rs/serde/latest/serde/index.html) ([yaml](https://docs.rs/serde_yaml/latest/serde_yaml/) & [json](https://docs.rs/serde_json/latest/serde_json/))                                                                                                        |                                                                                                                               |
-| Command Query Responsibility Segregation & Event Sourcing | [cqrs-es](https://docs.rs/cqrs-es/latest/cqrs_es/)                                                                                                                                                                                                                            |                                                                                                                               |
-| Async Database Driver (SQL)                             | [SQLx](https://docs.rs/sqlx/latest/sqlx/)                                                                                                                                                                                                                                     | SQL queries are checked against the database for validity _at compile time_                                                   |
-| Mocking                                                   | [mockall](https://docs.rs/mockall/latest/mockall/)                                                                                                                                                                                                                            | Leverage the power of Rust's macro system by using [`#[automock]`](https://docs.rs/mockall/latest/mockall/attr.automock.html) to automatically create mocks!                                                                                                                               |
-| Error Handling                                            | [thiserror](https://docs.rs/thiserror/latest/thiserror/)                                                                                                                                                                                                                      |                                                                                                                               |
-| Behavior Driven Development / Cucumber Testing            | [Cucumber](https://docs.rs/cucumber/latest/cucumber/)                                                                                                                                                                                                                         |                                                                                                                               |
-| Loading env variables & .env file                         | [Dotenvy](https://docs.rs/dotenvy/latest/dotenvy/)                                                                                                                                                                                                                            |                                                                                                                               |
-| Improved assertion difference identification              | [Pretty Assertions](https://docs.rs/pretty_assertions/latest/pretty_assertions/)                                                                                                                                                                                              | Highlights the difference in tests character by character                                                                     |
-| Supercharged derive attributes                            | [Derivative](https://mcarton.github.io/rust-derivative/latest/index.html)                                                                                                                                                                                                     |
-| Code coverage generation | [cargo-llmvm-cov](https://github.com/taiki-e/cargo-llvm-cov) | |
-| Automatic Typescript Binding Generation | [ts-rs](https://docs.rs/ts-rs/latest/ts_rs) | Automatically generates TypeScript interfaces for your Rust view models! |
-| Authentication using OpenID Connect | [openidconnect-rs](https://docs.rs/openidconnect/latest/openidconnect/) | Log in with Google (other providers to come) |
-
-### Supporting containers
-
-Veloxide comes pre-configured with the following supporting containers found in the `docker-compose.yml` file:
-
-- **[Jaeger](https://www.jaegertracing.io)**: Traces will be sent to Jaeger, which can be accessed at `http://localhost:16686`.
-- **[Prometheus](https://prometheus.io/)** will be available at `http://localhost:9090`.
-- **[Grafana](https://grafana.com/)**: Will be available at `http://localhost:3000`. The default username and password are both `admin`. Prometheus is already configured as the default data source.
-- **[Postgres](https://www.postgresql.org/)** will be be listening on port `5432` for new connections. The connection string is loaded from the environment variable `DATABASE_URL`, which is pre-configured in the .env file.
-- **[Envoy](https://www.envoyproxy.io/)**: Coming soon.
-- **[Open Policy Agent](https://www.openpolicyagent.org/)**: Coming soon.
+- **[Layered Architecture](https://en.wikipedia.org/wiki/Multitier_architecture)**: The codebase is divided into layers, each with a specific responsibility, as per the principles of [Domain-Driven Design](https://en.wikipedia.org/wiki/Domain-driven_design). This makes the application more modular, as well as easier to understand and maintain.
 
 ## Getting started
 
@@ -95,38 +57,33 @@ Install the Veloxide CLI:
 > cargo install veloxide
 ```
 
-To create your own app:
+Create your own app:
 
 ```zsh
 > veloxide init my-app
 
-# Go to created folder
+# Go to the created folder
 > cd my-app
 
-# Install tools
+# Install the required tools for development
 > just install-required
 
-# Start the supporting containers, followed by the build process
-> just dev
+# Set the environment to use the Postgres config, start the supporting containers, and then run the app
+> just dev-postgres
 
 # Once done, open `my-app/` in your IDE
 
 # Happy Coding!
 ```
 
-- The OpenAPI interactive documentation is available at `http://localhost:8080/swagger-ui/`
-- GraphQL Playground is available at `http://localhost:8080/graphql`
+- The OpenAPI interactive documentation will be accessible at `http://localhost:8080/swagger-ui/`
+- The GraphQL Playground will be accessible at `http://localhost:8080/graphql`
+- There is a [postman-collection](https://github.com/liamwh/veloxide/tree/main/veloxide-demo.postman_collection.json) that supports both the REST and GraphQL APIs for you to import
+- Additional helper commands can be shown by running `just` in the root directory.
 
-## Why the name?
+## User guide
 
-Velox + Oxide = Veloxide
-
-- Velox: latin for "swift", "rapid" or "quick", just like development with this stack 😉
-- Oxide: Rust is an iron oxide, and all components of Veloxide are written in Rust.
-
-## Additional Documentation
-
-Can be found in the [docs](docs) folder.
+The complete guide to Veloxide is accessible at [guide.veloxide.org](https://guide.veloxide.org).
 
 ## Contributors
 
