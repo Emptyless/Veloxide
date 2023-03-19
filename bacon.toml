@@ -3,7 +3,7 @@
 # Bacon repository: https://github.com/Canop/bacon
 # Complete help on configuration: https://dystroy.org/bacon/config/
 
-default_job = "check"
+default_job = "check-all"
 
 [jobs.check]
 command = ["cargo", "check", "--color", "always", "--features", "postgres"]

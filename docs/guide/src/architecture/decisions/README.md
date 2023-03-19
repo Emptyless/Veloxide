@@ -1,3 +1,3 @@
-# Architecture Decision Log
+# Architecture Decision Records
 
 Under construction.

@@ -45,8 +45,6 @@ coverage/*
 .env.*
 !.env.example
 
-fly.toml
-
 veloxide-frontend/
 
 .bacon.toml

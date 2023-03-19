@@ -5,7 +5,7 @@ default:
   @just --list --justfile {{justfile()}}
 
 # Run the application supporting containers, then run the binary
-dev:
+dev: fmt
 	docker-compose up -d
 	cargo prisma db push
 	cargo run -p veloxide-server | bunyan
@@ -44,11 +44,11 @@ stop:
 restart: stop dev
 
 # Generates a code coverage report to be viewed in your IDE.
-cover:
+cover: fmt
 	cargo llvm-cov report --lcov --output-path ./coverage/lcov.info
 
 # Generate a HTML coverage report and open it
-coverhtml:
+coverhtml: fmt
 	cargo llvm-cov --html
 	open target/llvm-cov/html/index.html
 
@@ -68,8 +68,14 @@ install-required:
 	@echo "Installing ruplacer (replacement tool: https://github.com/your-tools/ruplacer)"
 	cargo install ruplacer
 
+	@echo "Installing ripgrep (search tool: https://github.com/BurntSushi/ripgrep)"
+	cargo install ripgrep
+
 	@echo "Installing mdbook (book tool: https://github.com/rust-lang/mdBook)"
 	cargo install mdbook
+
+	@echo "Installing Rust nightly toolchain"
+	rustup toolchain install nightly
 
 	@echo "Installing tools...Done"
 
@@ -89,5 +95,15 @@ install-recommended:
 install-all: install-required install-recommended
 
 # Opens the user guide in your browser
-watch-guide:
+guide:
 	mdbook watch ./docs/guide --open
+
+[private]
+fmt-nightly:
+  rustup default nightly
+  cargo fmt --all
+  rustup default stable
+
+[private]
+fmt:
+  cargo fmt --all

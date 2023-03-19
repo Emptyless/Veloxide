@@ -18,7 +18,7 @@ The book describing the CQRS-ES crate used in Veloxide can be found [here](https
 
 Veloxide implements the layers as specified in domain driven design.
 
-![Domain Driven Design Layers](../.././ddd-layers.png)
+![Domain Driven Design Layers](../images/ddd-layers.png)
 
 ### Presentation Layer
 

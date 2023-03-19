@@ -16,7 +16,7 @@ COPY . ./
 
 ARG DATABASE_KIND="mysql"
 
-RUN cargo build --release --features ${DATABASE_KIND}
+RUN cargo prisma generate && cargo build --release --features ${DATABASE_KIND}
 
 ############################
 # STAGE 2 build a small image
