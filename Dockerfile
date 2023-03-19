@@ -6,7 +6,7 @@ FROM rust:${VERSION}-buster AS builder
 ############################
 
 # The below line should match the package name in Cargo.toml
-ARG APP_NAME="example-veloxide-api"
+ARG APP_NAME="veloxide-server"
 
 RUN cargo new --bin ${APP_NAME}
 
@@ -37,7 +37,7 @@ RUN groupadd $APP_USER \
     && useradd -g $APP_USER $APP_USER \
     && mkdir -p ${APP}
 
-COPY --from=builder /example-veloxide-api/target/release/example-veloxide-api ${APP}/example-veloxide-api
+COPY --from=builder /veloxide-server/target/release/veloxide-server ${APP}/veloxide-server
 
 RUN chown -R $APP_USER:$APP_USER ${APP}
 
@@ -48,4 +48,4 @@ WORKDIR ${APP}
 
 # HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 CMD curl -f http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["./example-veloxide-api"]
+ENTRYPOINT ["./veloxide-server"]
