@@ -3816,8 +3816,8 @@ dependencies = [
 
 [[package]]
 name = "prisma-client-rust-cli"
-version = "0.6.5"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.5#3db4094ae70aa0aa7047da005d14c0a3ff48ec51"
+version = "0.6.6"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.6#76693baa675bcb38213901984b306d92c4e8a168"
 dependencies = [
  "directories",
  "flate2",
@@ -3836,8 +3836,8 @@ dependencies = [
 
 [[package]]
 name = "prisma-client-rust-sdk"
-version = "0.6.5"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.5#3db4094ae70aa0aa7047da005d14c0a3ff48ec51"
+version = "0.6.6"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.6#76693baa675bcb38213901984b306d92c4e8a168"
 dependencies = [
  "convert_case 0.5.0",
  "dml",
