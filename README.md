@@ -25,7 +25,7 @@
 
 ---
 
-Veloxide is the solution for anyone looking to simplify the process of developing a quality web API. Say goodbye to decision fatigue and hello to focusing on what really matters: delivering value to your consumers. With Veloxide, you'll enjoy a modern, easy-to-use, batteries-included, and lightning-fast technology stack that is prepared to be "plugged-in" with your business logic. Use Veloxide and experience how it transforms the way you develop and deploy your API. Get ready to experience the ultimate ease and efficiency in API development with Veloxide!
+Veloxide simplifies the web API development process, letting you focus on delivering value to your consumers. With Veloxide, you can enjoy a modern, easy-to-use, and fast technology stack that can be integrated with your business logic.  
 
 Its key qualities are:
 
