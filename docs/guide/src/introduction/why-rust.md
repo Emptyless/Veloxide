@@ -2,6 +2,20 @@
 
 <!-- markdownlint-disable MD033 -->
 
+<!-- toc -->
+
+## Rust's rich type system
+
+Rust's rich type system is one of its most notable features, and it provides numerous benefits to developers.
+
+### Ability to express problems and solutions precisely
+
+Rust's rich type system provides developers with the ability to express problems and solutions precisely by allowing for highly specific type definitions and pattern matching. Rust's pattern matching capabilities enable developers to write code that is highly expressive and can handle complex data structures with ease. This level of precision and expressiveness allows developers to communicate their intent more clearly, reducing the likelihood of misunderstandings or errors in their code. Furthermore, the ability to express problems and solutions precisely also makes it easier for other developers to understand and maintain code, even if they are not familiar with the specifics of the problem domain. Overall, Rust's rich type system enables developers to write code that is highly precise, expressive, and easy to understand, which leads to more robust and maintainable software.
+
+### Secure and reliable: No null pointer dereferences or data races
+
+Rust's unique ownership model and type system eliminates many common programming errors such as buffer overflows and null / nil pointer dereferences, which can lead to bugs and security vulnerabilities. The type system ensures that code is correct at compile time, catching many errors that might otherwise slip through and cause bugs or crashes at runtime. This saves developers a significant amount of time and effort, as they can catch and fix issues earlier in the development process. Secondly, Rust's type system is designed to prevent common programming mistakes, such as null pointer dereferencing or data races, that can lead to security vulnerabilities or hard-to-debug issues.
+
 ## Speed of development
 
 Rust's compiler shrinks the feedback loop between writing code and seeing the results. This makes it easy to iterate quickly and experiment with new ideas.
@@ -12,14 +26,16 @@ Rust's compiler shrinks the feedback loop between writing code and seeing the re
 
 [Macros](https://doc.rust-lang.org/book/ch19-06-macros.html) in Rust are a powerful tool that allows developers to write code that can generate other code at compile-time ([metaprogramming](https://en.wikipedia.org/wiki/Metaprogramming)), making it possible to automate repetitive tasks, reduce boilerplate code, and achieve greater code reuse. Rust's macro system is highly flexible and expressive, allowing developers to define complex transformations on the code, such as code generation, syntactic transformations, and type inference. This makes Rust macros an excellent choice for tasks such as domain-specific language implementation, serialization and deserialization, and code optimization, among others. Furthermore, Rust's macro system is designed to be safe and predictable, preventing accidental code execution or memory errors, and producing clear error messages when issues arise.
 
-## Focus on the "Happy Flow"
+## Legibility: Rust code focuses on the "Happy Flow"
 
 Rust's `?` syntax, `Result` and `Option` types, lack of null/nil, and `match` keyword combine to make it easy to write code that focuses on the "happy flow" of the program. This makes it easy to write code that is easy to read, understand and maintain.
+
+### Rust vs Go comparison
 
 <details>
   <summary>Click to take a look at some Rust vs Go code comparisons</summary>
 
-### Go
+### Go: Do something example
 
 ```go
 func DoSomething() (*MyResultType, error) {
@@ -35,7 +51,7 @@ In this example, the function DoSomething calls SomeOperation and checks the err
 
 Now let's take a look at the equivalent Rust code:
 
-### Rust
+### Rust: Do something equivalent
 
 ```rust
 fn do_something() -> Result<MyResultType, Error> {
@@ -69,7 +85,7 @@ The indentation here for such a simple case makes the code increasingly difficul
 
 Here's how Rust's match statements can be used to handle different error conditions, reduce indentation, and keep the focus on the happy flow:
 
-### Rust (outer function)
+### Rust (outer function) equivalent
 
 ```rust
 fn do_something_else() -> Result<MyResultType, Error> {
@@ -94,13 +110,9 @@ Rust's error handling, ? syntax, and match statements work together to keep the 
 
 </details>
 
-## Memory Safety
+## Ecosystem and Community support
 
-Rust is designed to eliminate many common programming errors such as buffer overflows and null / nil pointer dereferences, which can lead to bugs and security vulnerabilities. This makes Rust best in class for developing secure and reliable software.
-
-## Community support
-
-Rust has a growing and active community of developers who contribute to its ecosystem of libraries and tools. There is often a "best-in-class" crate for any given problem at hand, meaning you learn one API and you needn't learn another. Rust libaries have a tendency to end up "[finished](https://www.youtube.com/watch?v=Q3AhzHq8ogs)", often requiriing little to no maintenance. This means that you can focus on your application's domain logic, rather than the plumbing.
+Rust has a active community of developers who contribute to its ecosystem of libraries and tools. There is often a "best-in-class" crate for any given problem at hand, meaning you can learn one API and you needn't learn another. Rust libaries have a tendency to end up "[finished](https://www.youtube.com/watch?v=Q3AhzHq8ogs)", often requiriing little to no maintenance. This means that you can focus on your application's domain logic, rather than the plumbing.
 
 ## Performance
 
@@ -114,7 +126,7 @@ In the Benchmarks Game's evaluation of various algorithms, Rust demonstrated sup
 
 ## Conclusion
 
-Overall, Rust provides a better developer experience by providing a shorter feedback loop and more legible code, Rust code is considered more secure than any other language out there, it's more performant than just about all languages except C, and it has a vibrant community of developers who contribute to its ecosystem of libraries and tools. These factors make Rust an outstanding choice for developing secure, reliable, and performant software of any kind.
+Overall, Rust provides a better developer experience by providing a shorter feedback loop and more legible code, Rust code is considered more secure than any other language out there, it's more performant than just about all languages except C, and it has a vibrant community of developers who contribute to its ecosystem of libraries and tools. These factors make Rust an outstanding choice for developing secure, reliable, and performant software of almost any kind (data science (Python) and frontend development (Typescript) are clear exceptions, for now).
 
 Why **_wouldn't_** you choose rust for your next project?
 

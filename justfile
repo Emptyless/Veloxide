@@ -72,7 +72,7 @@ install-required:
 	cargo install ripgrep
 
 	@echo "Installing mdbook (book tool: https://github.com/rust-lang/mdBook)"
-	cargo install mdbook
+	cargo install mdbook && cargo install mdbook-toc
 
 	@echo "Installing Rust nightly toolchain"
 	rustup toolchain install nightly
