@@ -24,6 +24,6 @@
 
 - [Supporting Containers](./supporting-containers/README.md)
   - [Postgres](./supporting-containers/postgres.md)
-  - [Jaeger](./supporting-containers/jaeger.md)
+  - [Tempo](./supporting-containers/tempo.md)
   - [Prometheus](./supporting-containers/prometheus.md)
   - [Grafana](./supporting-containers/grafana.md)

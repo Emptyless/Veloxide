@@ -25,18 +25,22 @@ mod domain;
 mod prelude;
 mod presentation;
 mod state;
-use tracing_log::LogTracer;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
-    LogTracer::init()?;
+    tracing_log::LogTracer::builder()
+        .ignore_crate("sqlx")
+        .with_max_level(log::LevelFilter::Info)
+        .init()
+        .expect("could not initialize log tracer");
     match configuration::observability::configure_tracing().await {
         Ok(_) => {
-            tracing::debug!("tracing subscriber set");
+            tracing::debug!("tracing configured");
         }
         Err(err) => {
-            tracing::error!("error setting tracing subscriber: {}", err);
+            tracing::error!("error configuring tracing: {}", err);
+            return Err(err);
         }
     };
 

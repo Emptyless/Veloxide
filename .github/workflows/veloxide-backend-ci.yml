@@ -33,6 +33,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install protobuf-compiler
+        run: sudo apt-get install protobuf-compiler
+
       - uses: Swatinem/rust-cache@v2
 
       - name: Generate prisma.rs
@@ -73,6 +76,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install protobuf-compiler
+        run: sudo apt-get install protobuf-compiler
+
       - uses: Swatinem/rust-cache@v2
 
       - name: Generate prisma.rs
@@ -99,6 +105,9 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+
+      - name: Install protobuf-compiler
+        run: sudo apt-get install protobuf-compiler
 
       - uses: Swatinem/rust-cache@v2
 
@@ -127,6 +136,9 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+
+      - name: Install protobuf-compiler
+        run: sudo apt-get install protobuf-compiler
 
       - uses: Swatinem/rust-cache@v2
 

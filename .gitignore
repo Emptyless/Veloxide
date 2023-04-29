@@ -53,3 +53,5 @@ veloxide-frontend/
 
 # Book
 /docs/guide/book
+
+docker/**/data

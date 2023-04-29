@@ -1,44 +1,55 @@
-use tracing::instrument;
-use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+use opentelemetry_otlp::WithExportConfig;
+use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, Layer};
 
-#[cfg(feature = "bunyan")]
-use tracing_bunyan_formatter::BunyanFormattingLayer;
+const OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VAR: &str = "OTEL_EXPORTER_OTLP_ENDPOINT";
+const OTEL_EXPORTER_OTLP_ENDPOINT_DEFAULT: &str = "http://localhost:4317";
 
-#[instrument]
+const OBSERVABILITY_SERVICE_NAME_ENV_VAR: &str = "OBSERVABILITY_SERVICE_NAME";
+const DEFAULT_SERVICE_NAME: &str = "veloxide-server";
+
+#[tracing::instrument]
 pub async fn configure_tracing() -> std::result::Result<(), crate::error::Error> {
-    // Configure the OpenTelemetry tracer
-    opentelemetry::global::set_text_map_propagator(opentelemetry_jaeger::Propagator::new());
+    let otel_exporter_endpoint =
+        dotenvy::var(OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VAR).unwrap_or_else(|_| {
+            tracing::warn!(
+                "{} Env var not set, using default",
+                OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VAR
+            );
+            OTEL_EXPORTER_OTLP_ENDPOINT_DEFAULT.to_string()
+        });
 
-    // TODO: Use the OTEL collector instead of going directly to Jaeger
+    let tracing_service_name = dotenvy::var(OBSERVABILITY_SERVICE_NAME_ENV_VAR)
+        .unwrap_or_else(|_| DEFAULT_SERVICE_NAME.to_string());
 
-    // Get the service name from the environment
-    let tracing_service_name =
-        dotenvy::var("TRACING_SERVICE_NAME").unwrap_or_else(|_| "veloxide-service".to_string());
-
-    // Create a new Jaeger tracer
-    let tracer = opentelemetry_jaeger::new_agent_pipeline()
-        .with_service_name(tracing_service_name.clone())
-        .install_simple()
-        // .install_batch(opentelemetry::runtime::Tokio) // Uncomment me to use batch span processor
-        .expect("Expected Jaeger tracer to install successfully, regardless of whether Jaeger is running or not");
+    let tracer = opentelemetry_otlp::new_pipeline()
+        .tracing()
+        .with_exporter(
+            opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_endpoint(otel_exporter_endpoint),
+        )
+        .with_trace_config(opentelemetry::sdk::trace::config().with_resource(
+            opentelemetry::sdk::Resource::new(vec![opentelemetry::KeyValue::new(
+                "service.name",
+                tracing_service_name,
+            )]),
+        ))
+        .install_batch(opentelemetry::runtime::Tokio)?;
 
     // Create a tracing layer with the configured tracer
-    let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+    let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+
+    let filter = tracing_subscriber::EnvFilter::from_default_env();
 
     // Use the tracing subscriber `Registry`, or any other subscriber
     // that impls `LookupSpan`
-    cfg_if::cfg_if! {
-        if #[cfg(feature="bunyan")] {
-            // Create a new formatting layer to print bunyan formatted logs to stdout, pipe into bunyan to view
-            let formatting_layer = BunyanFormattingLayer::new(tracing_service_name, std::io::stdout);
-            let subscriber = tracing_subscriber::Registry::default()
-                .with(formatting_layer)
-                .with(telemetry);
-        } else {
-            let subscriber = tracing_subscriber::Registry::default()
-                .with(telemetry);
-        }
-    }
+    let subscriber = tracing_subscriber::Registry::default()
+        .with(telemetry_layer)
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_writer(std::io::stdout)
+                .with_filter(filter),
+        );
 
     Ok(tracing::subscriber::set_global_default(subscriber)?)
 }

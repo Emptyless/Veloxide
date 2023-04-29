@@ -37,7 +37,3 @@ Overall, a /metrics endpoint provides valuable insights into the inner workings 
 ### Introduction to Logging
 
 Logging is a technique used in software applications to record events that occur during the execution of a program. These events can include information such as errors, warnings, and other diagnostic data. Implementing logging in a software application is important because it provides visibility into the performance and behavior of the system. By logging events as they occur, developers can identify issues in the system, such as errors or performance bottlenecks, and then use this information to diagnose and resolve the issues. Logging can also be used to improve the user experience by providing insights into user behavior and usage patterns. Overall, implementing logging is essential for building scalable, reliable, and observable software systems, which are critical in today's world of complex, distributed systems.
-
-### Bunyan
-
-Bunyan is a logging format for events and errors, as well as a rich set of built-in features such as support for multiple streams, log levels, and custom serializers. Bunyan is designed to be fast and lightweight, and it is widely used in production applications. Bunyan is the logging format used by Veloxide.

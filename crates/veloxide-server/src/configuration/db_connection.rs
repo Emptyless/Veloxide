@@ -4,7 +4,7 @@ use super::*;
 async fn get_database_environment_variable() -> String {
     tracing::event!(Level::INFO, "getting database environment variable");
     let db_url = dotenvy::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    tracing::event!(Level::INFO, "database environment variable set: {db_url}");
+    tracing::event!(Level::INFO, "database environment variable set.");
     db_url
 }
 

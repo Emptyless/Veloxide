@@ -50,6 +50,9 @@ pub enum Error {
 
     #[error(transparent)]
     ClaimsVerificationError(#[from] openidconnect::ClaimsVerificationError),
+
+    #[error(transparent)]
+    TraceError(#[from] opentelemetry::trace::TraceError),
 }
 
 impl IntoResponse for Error {

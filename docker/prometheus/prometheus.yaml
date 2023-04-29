@@ -12,12 +12,13 @@ alerting:
       api_version: v1
 
 scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "prometheus"
-    metrics_path: /metrics
-    scrape_interval: 5s
     static_configs:
-      - targets: ["prometheus:9090"]
+      - targets: ["localhost:9090"]
+
+  - job_name: "tempo"
+    static_configs:
+      - targets: ["tempo:3200"]
 
   - job_name: "veloxide"
     scrape_interval: 5s

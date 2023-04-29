@@ -8,7 +8,7 @@ default:
 dev: fmt
 	docker-compose up -d
 	cargo prisma db push
-	cargo run -p veloxide-server | bunyan
+	cargo run -p veloxide-server
 
 # Set the configuration to use postgres, then run the application supporting containers, then run the binary
 dev-postgres: set-postgres dev
@@ -18,7 +18,7 @@ dev-mysql: set-mysql dev
 
 [private]
 set-db db:
-	ruplacer 'default = \["tracing", "graphql", "frontend", "(postgres|mysql)", "openapi", "bunyan"\]' 'default = ["tracing", "graphql", "frontend", "{{db}}", "openapi", "bunyan"]' crates/veloxide-server/Cargo.toml --go
+	ruplacer 'default = \["tracing", "graphql", "frontend", "(postgres|mysql)", "openapi"]' 'default = ["tracing", "graphql", "frontend", "{{db}}", "openapi"]' crates/veloxide-server/Cargo.toml --go
 	ruplacer 'provider(.*?)= "(postgres|mysql)"' 'provider$1= "{{db}}"' prisma/schema.prisma --go
 	ruplacer '(postgres|mysql)' {{db}} bacon.toml --go
 	@echo "Default database in Cargo.toml set to {{db}}"
@@ -61,9 +61,6 @@ install-required:
 
 	@echo "Installing sqlx-cli (database migrations: https://crates.io/crates/sqlx-cli)"
 	cargo install sqlx-cli --no-default-features --features postgres,mysql,sqlite,rustls
-
-	@echo "Installing bunyan (JSON log viewer: https://github.com/LukeMathWalker/bunyan)"
-	cargo install bunyan
 
 	@echo "Installing ruplacer (replacement tool: https://github.com/your-tools/ruplacer)"
 	cargo install ruplacer
