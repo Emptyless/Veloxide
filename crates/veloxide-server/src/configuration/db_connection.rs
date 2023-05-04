@@ -58,11 +58,18 @@ cfg_if::cfg_if! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+
+    const ENV_EXAMPLE_FILEPATH: &str = ".env.example";
+
     #[tokio::test]
-    async fn test_get_database_environment_variable() {
-        env::set_var("DATABASE_URL", "test");
+    async fn test_database_url_is_set_in_env_example_correctly() {
+        let load_result = dotenvy::from_filename_override(ENV_EXAMPLE_FILEPATH);
+        assert_eq!(load_result.is_ok(), true);
+
         let db_connection_url = get_database_environment_variable().await;
-        assert_eq!(db_connection_url, "test");
+        assert_eq!(
+            db_connection_url,
+            "postgresql://postgres:thisisnotsecure@localhost:5432/veloxidedb"
+        );
     }
 }

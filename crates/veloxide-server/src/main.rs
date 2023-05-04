@@ -26,15 +26,23 @@ mod prelude;
 mod presentation;
 mod state;
 
+const HTTP_PORT_ENV_VAR: &str = "HTTP_PORT";
+const HTTP_PORT_DEFAULT: &str = "8080";
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Load env variables
     dotenv().ok();
+
+    // Configure logging
     tracing_log::LogTracer::builder()
         .ignore_crate("sqlx")
         .with_max_level(log::LevelFilter::Info)
         .init()
         .expect("could not initialize log tracer");
-    match configuration::observability::configure_tracing().await {
+
+    // Configure tracing
+    match configuration::observability::configure_observability().await {
         Ok(_) => {
             tracing::debug!("tracing configured");
         }
@@ -61,7 +69,7 @@ async fn main() -> Result<()> {
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST])
         .allow_headers([CONTENT_TYPE])
-        // allow requests from any origin TODO: Make me more secure
+        // allow requests from any origin NOTE: This is not secure
         .allow_origin(Any);
 
     // Set up the GraphQL router
@@ -90,10 +98,27 @@ async fn main() -> Result<()> {
         .route("/health", get(|| async move { "HEALTHY" }));
 
     // Run the router
-    let port = dotenvy::var("HTTP_PORT").unwrap_or_else(|_| "8080".to_string());
+    let port = dotenvy::var(HTTP_PORT_ENV_VAR).unwrap_or_else(|_| HTTP_PORT_DEFAULT.to_string());
     let port = port.parse::<u16>()?;
     let address = format!("[::]:{}", port).parse().unwrap();
     Ok(Server::bind(&address)
         .serve(app.into_make_service())
         .await?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    const ENV_EXAMPLE_FILEPATH: &str = ".env.example";
+
+    #[tokio::test]
+    async fn test_http_port_default_in_env_example_is_set() {
+        let load_result = dotenvy::from_filename_override(ENV_EXAMPLE_FILEPATH);
+        assert_eq!(load_result.is_ok(), true);
+
+        let http_port = dotenvy::var(HTTP_PORT_ENV_VAR);
+        assert_eq!(http_port.unwrap(), HTTP_PORT_DEFAULT.to_string());
+    }
 }

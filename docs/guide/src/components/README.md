@@ -22,4 +22,4 @@ Veloxide is comprised of the following components, the higher level of which we 
 | Supercharged derive attributes                            | [Derivative](https://mcarton.github.io/rust-derivative/latest/index.html)                                                                                                                                                                                                     |
 | Code coverage generation | [cargo-llmvm-cov](https://github.com/taiki-e/cargo-llvm-cov) | |
 | Automatic Typescript Binding Generation | [ts-rs](https://docs.rs/ts-rs/latest/ts_rs) | Automatically generates TypeScript interfaces for your Rust view models! |
-| Authentication using OpenID Connect | [openidconnect-rs](https://docs.rs/openidconnect/latest/openidconnect/) | Log in with Google (other providers to come) |
+<!-- | Authentication using OpenID Connect | [openidconnect-rs](https://docs.rs/openidconnect/latest/openidconnect/) | Log in with Google (other providers to come) (Work-in-progress, hopefully coming soon!) | -->
