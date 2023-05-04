@@ -18,7 +18,7 @@ pub async fn configure_observability() -> std::result::Result<(), crate::error::
             OTEL_EXPORTER_OTLP_ENDPOINT_DEFAULT.to_string()
         });
 
-    let tracing_service_name = dotenvy::var(OBSERVABILITY_SERVICE_NAME_ENV_VAR)
+    let observability_service_name = dotenvy::var(OBSERVABILITY_SERVICE_NAME_ENV_VAR)
         .unwrap_or_else(|_| OBSERVABILITY_SERVICE_NAME_DEFAULT.to_string());
 
     let tracer = opentelemetry_otlp::new_pipeline()
@@ -31,7 +31,7 @@ pub async fn configure_observability() -> std::result::Result<(), crate::error::
         .with_trace_config(opentelemetry::sdk::trace::config().with_resource(
             opentelemetry::sdk::Resource::new(vec![opentelemetry::KeyValue::new(
                 "service.name",
-                tracing_service_name,
+                observability_service_name,
             )]),
         ))
         .install_batch(opentelemetry::runtime::Tokio)?;
