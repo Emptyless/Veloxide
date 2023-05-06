@@ -37,3 +37,13 @@ Overall, a /metrics endpoint provides valuable insights into the inner workings 
 ### Introduction to Logging
 
 Logging is a technique used in software applications to record events that occur during the execution of a program. These events can include information such as errors, warnings, and other diagnostic data. Implementing logging in a software application is important because it provides visibility into the performance and behavior of the system. By logging events as they occur, developers can identify issues in the system, such as errors or performance bottlenecks, and then use this information to diagnose and resolve the issues. Logging can also be used to improve the user experience by providing insights into user behavior and usage patterns. Overall, implementing logging is essential for building scalable, reliable, and observable software systems, which are critical in today's world of complex, distributed systems.
+
+### Bunyan
+
+Bunyan is a logging library originally for Node.js applications. It was named after Paul Bunyan, the mythical lumberjack from American folklore, as a metaphor for cutting through the logs. Using Bunyan has several advantages:
+
+1. Structured logging: Bunyan logs are JSON objects, making it easy to filter, analyze, and process the log data. This structured approach allows for better log management and analysis in comparison to unstructured text logs.
+2. Third-party integrations: Bunyan integrates well with third-party log management and analysis tools, such as Logstash, Elasticsearch, Kibana or Grafana Loki. This allows you to leverage powerful log analysis and visualization tools to gain better insights into your application's performance and behavior.
+2. Readable logs: Bunyan provides a command-line tool called 'bunyan' that can be used to pretty-print log output, making it more human-readable.
+
+You will have the bunyan CLI tool installed if you have ran `just install-required` in the root of the project. The `bunyan` feature flag is enabled by default. If you want to test the locally, run the application and pipe the output into bunyan.

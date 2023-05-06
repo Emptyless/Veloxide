@@ -1,5 +1,6 @@
 use opentelemetry_otlp::WithExportConfig;
-use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, Layer};
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 
 const OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VAR: &str = "OTEL_EXPORTER_OTLP_ENDPOINT";
 const OTEL_EXPORTER_OTLP_ENDPOINT_DEFAULT: &str = "http://localhost:4317";
@@ -31,7 +32,7 @@ pub async fn configure_observability() -> std::result::Result<(), crate::error::
         .with_trace_config(opentelemetry::sdk::trace::config().with_resource(
             opentelemetry::sdk::Resource::new(vec![opentelemetry::KeyValue::new(
                 "service.name",
-                observability_service_name,
+                observability_service_name.clone(),
             )]),
         ))
         .install_batch(opentelemetry::runtime::Tokio)?;
@@ -41,15 +42,22 @@ pub async fn configure_observability() -> std::result::Result<(), crate::error::
 
     let filter = tracing_subscriber::EnvFilter::from_default_env();
 
-    // Use the tracing subscriber `Registry`, or any other subscriber
-    // that impls `LookupSpan`
-    let subscriber = tracing_subscriber::Registry::default()
-        .with(telemetry_layer)
-        .with(
-            tracing_subscriber::fmt::layer()
-                .with_writer(std::io::stdout)
-                .with_filter(filter),
-        );
+    cfg_if::cfg_if! {
+    if #[cfg(feature="bunyan")] {
+            // Create a new formatting layer to print bunyan formatted logs to stdout, pipe into bunyan to view
+            let formatting_layer = BunyanFormattingLayer::new(observability_service_name, std::io::stdout);
+            let subscriber = tracing_subscriber::Registry::default()
+                .with(filter)
+                .with(telemetry_layer)
+                .with(JsonStorageLayer)
+                .with(formatting_layer);
+    } else {
+            let subscriber = tracing_subscriber::Registry::default()
+            .with_filter(filter),
+            .with_writer(std::io::stdout)
+            .with(telemetry_layer);
+        }
+    }
 
     Ok(tracing::subscriber::set_global_default(subscriber)?)
 }

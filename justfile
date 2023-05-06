@@ -8,7 +8,7 @@ default:
 dev: fmt
 	docker-compose up -d
 	cargo prisma db push
-	cargo run -p veloxide-server
+	cargo run -p veloxide-server | bunyan
 
 # Set the configuration to use postgres, then run the application supporting containers, then run the binary
 dev-postgres: set-postgres dev
@@ -64,6 +64,9 @@ install-required:
 
 	@echo "Installing ruplacer (replacement tool: https://github.com/your-tools/ruplacer)"
 	cargo install ruplacer
+
+	@echo "Installing bunyan (log parser tool: https://github.com/LukeMathWalker/bunyan)"
+  cargo install bunyan
 
 	@echo "Installing ripgrep (search tool: https://github.com/BurntSushi/ripgrep)"
 	cargo install ripgrep

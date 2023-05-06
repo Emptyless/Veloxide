@@ -42,13 +42,14 @@ sqlx = { version = "~0", features = [
   "offline",
 ] }
 
-# Observability 
+# Observability
 tracing = { version = "~0", features = ["log", "log-always"] }
 opentelemetry = {version ="0.18.0", features = ["rt-tokio"], optional = true }
 opentelemetry-otlp = { version = "0.11.0", features = ["tokio", "metrics"], optional = true }
 tracing-subscriber = { version = "~0", optional = true, features = ["env-filter", "std"]}
 tracing-opentelemetry = { version = "~0", optional = true }
 tracing-log = { version = "~0", optional = true, features = ["env_logger"] }
+tracing-bunyan-formatter = { version = "~0", optional = true }
 
 
 # Frontend
@@ -77,13 +78,14 @@ cfg-if = "~1"
 db = { version = "~0", path = "../db" }
 
 [features]
-default = ["tracing", "graphql", "frontend", "postgres", "openapi"]
+default = ["tracing", "graphql", "frontend", "postgres", "openapi", "bunyan"]
 mysql = ["mysql-es", "sqlx/mysql"]
 postgres = ["postgres-es", "sqlx/postgres"]
 tracing = ["tracing-log", "tracing-subscriber", "tracing-opentelemetry", "opentelemetry", "opentelemetry-otlp"]
 graphql = ["async-graphql", "async-graphql-axum"]
 frontend = ["ts-rs"]
 openapi = ["utoipa", "utoipa-swagger-ui"]
+bunyan = ["tracing-bunyan-formatter"]
 
 [dev-dependencies]
 anyhow = "~1"
