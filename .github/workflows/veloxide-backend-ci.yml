@@ -16,6 +16,16 @@ on:
       - "**.md"
 
 jobs:
+  security_audit:
+    runs-on: ubuntu-latest
+    name: Dependency audit
+    steps:
+      - uses: actions/checkout@v3
+      - uses: rustsec/audit-check@v1.4.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
   coverage:
     name: Code Coverage Report
     runs-on: ubuntu-latest
