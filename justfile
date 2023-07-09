@@ -66,7 +66,7 @@ install-required:
 	cargo install ruplacer
 
 	@echo "Installing bunyan (log parser tool: https://github.com/LukeMathWalker/bunyan)"
-  cargo install bunyan
+	cargo install bunyan
 
 	@echo "Installing ripgrep (search tool: https://github.com/BurntSushi/ripgrep)"
 	cargo install ripgrep

@@ -1,36 +1,43 @@
-# fly.toml file generated for veloxide-server on 2023-03-12T13:53:46+01:00
+# fly.toml app configuration file generated for veloxide-demo-api on 2023-07-06T16:28:00+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "veloxide-demo-api"
-kill_signal = "SIGINT"
-kill_timeout = 5
 primary_region = "ams"
-processes = []
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [experimental]
   auto_rollback = true
 
+[env]
+  PRIMARY_REGION = "ams"
+  RUST_LOG = "info"
+  OBSERVABILITY_SERVICE_NAME="veloxide-server-fly"
+  HTTP_PORT = "8080"
+
 [[services]]
-  http_checks = []
+  protocol = "tcp"
   internal_port = 8080
   processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
   [services.concurrency]
+    type = "connections"
     hard_limit = 25
     soft_limit = 20
-    type = "connections"
-
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
 
   [[services.tcp_checks]]
-    grace_period = "1s"
     interval = "15s"
-    restart_limit = 0
     timeout = "2s"
+    grace_period = "1s"
+    restart_limit = 0

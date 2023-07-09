@@ -14,9 +14,13 @@ WORKDIR ./${APP_NAME}
 
 COPY . ./
 
+ARG SQLX_OFFLINE=true
 ARG DATABASE_KIND="mysql"
+ARG FEATURES="tracing,graphql,frontend,openapi,bunyan"
 
-RUN cargo prisma generate && cargo build --release --features ${DATABASE_KIND}
+RUN apt-get update && apt-get install -y protobuf-compiler
+
+RUN cargo build --release --features ${DATABASE_KIND},${FEATURES} --no-default-features
 
 ############################
 # STAGE 2 build a small image
@@ -26,8 +30,9 @@ FROM debian:buster-slim
 
 ARG APP=/usr/src/app
 
-RUN apt-get update \
-    && apt-get install -y ca-certificates tzdata \
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Amsterdam \
