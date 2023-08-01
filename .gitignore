@@ -43,13 +43,12 @@ coverage/*
 /package
 .env
 .env.*
+**/*.env*
 !.env.example
 
 veloxide-frontend/
 
 .bacon.toml
-
-/crates/db/src/prisma.rs
 
 # Book
 /docs/guide/book

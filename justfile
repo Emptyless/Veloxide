@@ -7,7 +7,6 @@ default:
 # Run the application supporting containers, then run the binary
 dev: fmt
 	docker-compose up -d
-	cargo prisma db push
 	cargo run -p veloxide-server | bunyan
 
 # Set the configuration to use postgres, then run the application supporting containers, then run the binary
@@ -19,22 +18,18 @@ dev-mysql: set-mysql dev
 [private]
 set-db db:
 	ruplacer 'default = \["tracing", "graphql", "frontend", "(postgres|mysql)", "openapi"]' 'default = ["tracing", "graphql", "frontend", "{{db}}", "openapi"]' crates/veloxide-server/Cargo.toml --go
-	ruplacer 'provider(.*?)= "(postgres|mysql)"' 'provider$1= "{{db}}"' prisma/schema.prisma --go
 	ruplacer '(postgres|mysql)' {{db}} bacon.toml --go
 	@echo "Default database in Cargo.toml set to {{db}}"
-	@echo "Prisma database set to {{db}}, please ensure your DATABASE_URL is correct"
 
 # Set the database to mysql
 set-mysql: (set-db "mysql")
 	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$MYSQL_DATABASE_URL .env --go
 	@echo "DATABASE_URL set to MYSQL_DATABASE_URL"
-	cargo prisma generate
 
 # Set the database to postgres
 set-postgres: (set-db "postgres")
 	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$POSTGRES_DATABASE_URL .env --go
 	@echo "DATABASE_URL set to POSTGRES_DATABASE_URL"
-	cargo prisma generate
 
 # Stop the containers in docker (this stops the docker stack)
 stop:

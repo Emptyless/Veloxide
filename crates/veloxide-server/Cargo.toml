@@ -1,6 +1,7 @@
 [package]
 name = "veloxide-server"
 description = "Veloxide: Example Bank Account API"
+default-run = "veloxide-server"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
@@ -75,7 +76,6 @@ dotenvy = "~0"
 chrono = "~0"
 derivative = "~2"
 cfg-if = "~1"
-db = { version = "~0", path = "../db" }
 
 [features]
 default = ["tracing", "graphql", "frontend", "postgres", "openapi", "bunyan"]

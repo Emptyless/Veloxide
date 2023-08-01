@@ -7,7 +7,3 @@ Postgres is a popular open source database. It is a relational database, which m
 ## SQLx
 
 [See here](https://github.com/launchbadge/sqlx)
-
-## Prisma
-
-[See here](https://www.prisma.io/)
