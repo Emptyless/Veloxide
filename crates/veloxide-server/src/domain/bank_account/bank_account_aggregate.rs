@@ -33,8 +33,9 @@ impl Aggregate for BankAccount {
         services: &Self::Services,
     ) -> Result<Vec<Self::Event>, Self::Error> {
         match command {
-            BankAccountCommand::OpenAccount(account_id) => {
-                self.handle_open_account_command(services, account_id).await
+            BankAccountCommand::OpenAccount(open_bank_account_command_data) => {
+                self.handle_open_account_command(services, open_bank_account_command_data)
+                    .await
             }
             BankAccountCommand::DepositMoney(BankAccountDepositMoneyCommandData { amount }) => {
                 self.handle_deposit_money_command(services, amount).await

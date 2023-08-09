@@ -58,6 +58,14 @@ services:
     ports:
       - "6379:6379"
 
+  opa:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./policies:/policies
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "--log-level=debug", "/policies/authz.rego"]
+
   # Uncomment to use OTEL collector pipeline before Tempo
   # otel-collector:
   #   image: otel/opentelemetry-collector:latest

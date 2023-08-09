@@ -1,0 +1,167 @@
+{
+  "db": "PostgreSQL",
+  "534f9f02048d32ef4da083fb4fc6d5f5606dd955e644954d07ff0b1ea94031e9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO users (id, email, created_at, updated_at, token_salt) VALUES ($1, $2, $3, $4, $5)"
+  },
+  "606b4d715b40f7221272dd8a82d99b0c87901171c715f3a8404bd457e5db6ee5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "csrf_state",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "code_verifier",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "return_url",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT * FROM oauth2_states WHERE csrf_state = $1"
+  },
+  "843923b9a0257cf80f1dff554e7dc8fdfc05f489328e8376513124dfb42996e3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "token_salt",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT * FROM users WHERE id = $1"
+  },
+  "d97305000808fb3c9e26a028a1193b7a6dbc28e8cc85522e56e20b7ee61f2916": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "INSERT INTO oauth2_states (id, csrf_state, code_verifier, return_url, created_at) VALUES ($1, $2, $3, $4, $5)"
+  },
+  "f3f58600e971f1be6cbe206bba24f77769f54c6230e28f5b3dc719b869d9cb3f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "token_salt",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT * FROM users WHERE email = $1"
+  }
+}

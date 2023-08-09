@@ -1,4 +1,18 @@
-use super::*;
+use cqrs_es::persist::ViewRepository;
+
+use postgres_es::{PostgresCqrs, PostgresViewRepository};
+
+use crate::domain::bank_account::*;
+use crate::infrastructure::middleware::MetadataExtension;
+use std::sync::Arc;
+
+use axum::{
+    extract::Path, http::StatusCode, response::IntoResponse, response::Response, Extension, Json,
+};
+
+use tracing::instrument;
+
+pub use crate::interfaces::bank_account::*;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "postgres")] {
@@ -50,7 +64,7 @@ cfg_if::cfg_if! {
   pub async fn command_handler(
       Path(id): Path<String>,
       Extension(cqrs): Extension<Arc<PostgresCqrs<BankAccount>>>,
-      MetadataExtension(metadata): MetadataExtension,
+      MetadataExtension(metadata): crate::infrastructure::middleware::MetadataExtension,
       Json(command): Json<BankAccountCommand>,
   ) -> Response {
       match cqrs.execute_with_metadata(&id, command, metadata).await {

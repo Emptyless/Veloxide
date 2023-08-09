@@ -1,4 +1,4 @@
-use super::*;
+pub use tracing::*;
 
 #[instrument]
 async fn get_database_environment_variable() -> String {
@@ -64,7 +64,7 @@ mod tests {
     #[tokio::test]
     async fn test_database_url_is_set_in_env_example_correctly() {
         let load_result = dotenvy::from_filename_override(ENV_EXAMPLE_FILEPATH);
-        assert_eq!(load_result.is_ok(), true);
+        assert!(load_result.is_ok());
 
         let db_connection_url = get_database_environment_variable().await;
         assert_eq!(

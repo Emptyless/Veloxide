@@ -15,7 +15,7 @@ use tracing::instrument;
 
 use crate::domain::BankAccount;
 
-use super::{BankAccountGraphQlMutation, BankAccountGraphQlQuery, BankAccountView};
+use crate::interfaces::{BankAccountGraphQlMutation, BankAccountGraphQlQuery, BankAccountView};
 
 use cfg_if::cfg_if;
 

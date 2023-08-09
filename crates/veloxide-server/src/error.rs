@@ -39,6 +39,9 @@ pub enum Error {
     #[error("no id token found in claims")]
     NoIdToken,
 
+    #[error("failed to decode b64 encoded string")]
+    Base64DecodeError,
+
     #[error("code exchange failed")]
     CodeExchangeFailed,
 
@@ -53,6 +56,27 @@ pub enum Error {
 
     #[error(transparent)]
     TraceError(#[from] opentelemetry::trace::TraceError),
+
+    #[error(transparent)]
+    ColorEyreError(#[from] color_eyre::Report),
+
+    #[error(transparent)]
+    CryptograhyError(#[from] crate::infrastructure::cryptography::error::CryptograhyError),
+
+    #[error(transparent)]
+    AuthError(#[from] crate::infrastructure::middleware::error::AuthError),
+
+    #[error("invalid token format")]
+    InvalidTokenFormat,
+
+    #[error("failed to decode token identifier")]
+    FailedToDecodeTokenIdentifier,
+
+    #[error("failed to decode token expiration")]
+    FailedToDecodeTokenExpiration,
+
+    #[error("failed to parse token expiration")]
+    FailedToParseTokenExpiration,
 }
 
 impl IntoResponse for Error {

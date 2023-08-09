@@ -102,3 +102,15 @@ fmt-nightly:
 [private]
 fmt:
   cargo fmt --all
+
+# Restarts the OPA container, useful when you've changed the policy
+restart-opa:
+    docker-compose stop opa
+    docker-compose rm -f opa
+    docker-compose up -d opa
+    docker-compose logs -f opa
+
+# Tests the policies defined in /policies
+test-policies:
+    opa test ./policies -v
+

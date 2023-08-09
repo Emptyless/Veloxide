@@ -27,3 +27,4 @@
   - [Tempo](./supporting-containers/tempo.md)
   - [Prometheus](./supporting-containers/prometheus.md)
   - [Grafana](./supporting-containers/grafana.md)
+  - [Open Policy Agent](./supporting-containers/open-policy-agent.md)

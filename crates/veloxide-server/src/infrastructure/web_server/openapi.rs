@@ -1,16 +1,19 @@
-use utoipa::{
-    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
-    Modify, OpenApi,
-};
+use utoipa::OpenApi;
 
-use crate::domain::BankAccountCommand;
-use crate::presentation::*;
+//TODO: Remove reaching into domain from here
+use crate::domain::bank_account::*;
+use crate::infrastructure::web_server::bank_account_handlers;
+use crate::infrastructure::web_server::oauth::*;
+use crate::interfaces::*;
 
 #[derive(OpenApi)]
 #[openapi(
       paths(
-          bank_account::query_handler,
-          bank_account::command_handler,
+          bank_account_handlers::query_handler,
+          bank_account_handlers::command_handler,
+          login,
+          logout,
+          protected,
       ),
       components(
           schemas(
@@ -22,7 +25,6 @@ use crate::presentation::*;
             BankAccountWriteCheckCommandData,
             AccountTransaction),
     ),
-      modifiers(&SecurityAddon),
       tags(
           (name = "Bank Accounts", description = "Bank Account Management API")
       ),
@@ -34,16 +36,3 @@ use crate::presentation::*;
         ),
   )]
 pub struct ApiDoc;
-
-pub struct SecurityAddon;
-
-impl Modify for SecurityAddon {
-    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
-        if let Some(components) = openapi.components.as_mut() {
-            components.add_security_scheme(
-                "api_key",
-                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("todo_apikey"))),
-            )
-        }
-    }
-}

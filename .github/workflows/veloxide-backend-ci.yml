@@ -93,6 +93,21 @@ jobs:
         with:
           command: check
 
+  test-policies:
+    name: Test Policies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Run OPA Tests
+        run: opa test policies/*.rego -v
+
   test:
     name: Test
     runs-on: ubuntu-latest

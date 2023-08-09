@@ -1,0 +1,4 @@
+graphql:
+  enabled: true
+  port: 8080
+opa_url: "http://localhost:8181/v1/data/httpapi/authz"

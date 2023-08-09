@@ -4,19 +4,17 @@ use cqrs_es::Query;
 use cqrs_es::{persist::GenericQuery, EventEnvelope, View};
 
 use crate::application::{BankAccountServices, HappyPathBankAccountServices};
+use crate::infrastructure::logging::SimpleLoggingQuery;
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use cfg_if::cfg_if;
 
 pub mod bank_account_graphql;
-pub mod bank_account_handlers;
 pub mod bank_account_views;
 
 // Re-exports
 
 pub use bank_account_graphql::*;
-pub use bank_account_handlers::*;
 pub use bank_account_views::*;
 
 cfg_if! {
