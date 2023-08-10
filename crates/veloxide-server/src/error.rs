@@ -12,14 +12,11 @@ use hyper::StatusCode;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Generic: {0}")]
-    Generic(String), // The goal is to get rid of this generic error eventually
+    #[error(transparent)]
+    SetGlobalDefault(#[from] tracing::subscriber::SetGlobalDefaultError),
 
     #[error(transparent)]
-    SetGlobalDefaultError(#[from] tracing::subscriber::SetGlobalDefaultError),
-
-    #[error(transparent)]
-    HyperError(#[from] hyper::Error),
+    Hyper(#[from] hyper::Error),
 
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
@@ -30,26 +27,11 @@ pub enum Error {
     #[error(transparent)]
     ParseIntError(#[from] std::num::ParseIntError),
 
-    #[error("no email found in claims")]
-    NoEmail,
-
-    #[error("no name found in claims")]
-    NoName,
-
-    #[error("no id token found in claims")]
-    NoIdToken,
-
     #[error("failed to decode b64 encoded string")]
     Base64DecodeError,
 
-    #[error("code exchange failed")]
-    CodeExchangeFailed,
-
     #[error(transparent)]
     RedisError(#[from] redis::RedisError),
-
-    #[error("invalid state")]
-    InvalidState,
 
     #[error(transparent)]
     ClaimsVerificationError(#[from] openidconnect::ClaimsVerificationError),
@@ -81,10 +63,7 @@ pub enum Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let body = match self {
-            Error::Generic(msg) => msg,
-            _ => self.to_string(),
-        };
+        let body = self.to_string();
         (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
     }
 }
@@ -95,7 +74,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_error() {
-        let err = Error::Generic("test".to_string());
-        assert_eq!(err.to_string(), "Generic: test");
+        let err = Error::FailedToDecodeTokenIdentifier;
+        assert_eq!(err.to_string(), "failed to decode token identifier");
     }
 }

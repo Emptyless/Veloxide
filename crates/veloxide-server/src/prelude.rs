@@ -8,7 +8,3 @@ pub use crate::error::Error;
 
 use color_eyre::eyre;
 pub type Result<T> = eyre::Result<T, Error>;
-
-// Generic Wrapper tuple struct for newtype pattern, mostly for external type to type From/TryFrom conversions
-// See this video as a reference: https://www.youtube.com/watch?v=oxx7MmN4Ib0
-pub struct W<T>(pub T);

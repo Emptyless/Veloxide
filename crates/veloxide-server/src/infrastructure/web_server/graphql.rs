@@ -36,7 +36,7 @@ pub struct GraphQlConfiguration {
 }
 
 impl GraphQlConfiguration {
-    pub fn parse_serve_address(&self) -> SocketAddr {
+    pub fn _parse_serve_address(&self) -> SocketAddr {
         let serve_address_str = format!("127.0.0.1:{}", self.port);
         tracing::debug!("Parsing serve address: {}", serve_address_str);
 

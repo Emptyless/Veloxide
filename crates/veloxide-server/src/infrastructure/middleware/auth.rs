@@ -72,13 +72,6 @@ pub async fn mw_authenticate<B>(
     Ok(next.run(request).await)
 }
 
-fn get_user_token_cookie_value(cookies: &Cookies) -> Result<String, AuthError> {
-    cookies
-        .get(AUTH_TOKEN_COOKIE_NAME)
-        .map(|cookie| cookie.value().to_string())
-        .ok_or(AuthError::AuthTokenNotFound)
-}
-
 #[tracing::instrument(ret, err, level = "info")]
 async fn resolve_user_data(
     cookies: &Cookies,

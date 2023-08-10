@@ -1,5 +1,4 @@
 #![forbid(unsafe_code)]
-#![allow(dead_code)]
 #![allow(clippy::pedantic)]
 #![warn(clippy::all)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
