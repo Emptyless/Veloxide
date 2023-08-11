@@ -2,6 +2,11 @@
 
 <!-- markdownlint-disable MD033 -->
 
+## Warning: Subject to removal
+
+GraphQL is currently being scrutized and is likely to be replaced with a gRPC inplementation.
+
+
 ## Introduction to GraphQL
 
 GraphQL is a query language for APIs that was developed by Facebook in 2012 and has since gained popularity among developers for a number of reasons:
