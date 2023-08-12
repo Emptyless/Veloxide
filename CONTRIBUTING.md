@@ -17,15 +17,25 @@ cd Veloxide
 
 If you haven't already, install Rust by following the instructions [here](https://www.rust-lang.org/tools/install).
 
-### 3. Build and Test
+### 3. Install tools
 
-Build the project:
+If you haven't already, install Just by following the instrutions [here](https://github.com/casey/just).
+
+Install tools by running `install-required`, `install-recommended` or `install-all'
 
 ```bash
-cargo build
+just install-all
 ```
 
-Run the tests:
+### 3. Running and Testing
+
+To run Veloxide, piping the output into [bunyan](https://github.com/LukeMathWalker/bunyan) to format outputted the structured logs:
+
+```bash
+cargo run | bunyan
+```
+
+To run the tests:
 
 ```bash
 cargo test
