@@ -54,7 +54,6 @@ body:
     attributes:
       label: Reproduce
       description: "`cargo.toml` used to produce this issue."
-      value: ""
       render: toml
     validations:
       required: false
