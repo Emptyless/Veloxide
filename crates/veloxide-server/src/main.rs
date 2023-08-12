@@ -74,27 +74,34 @@ async fn main() -> crate::prelude::Result<()> {
     let google_oauth2_client = web_server::oauth::build_google_oauth_client();
     let user_data: Option<infrastructure::middleware::UserData> = None;
 
-    let app = Router::new()
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
-        .route(
-            "/api/bank-accounts/:id",
-            get(web_server::bank_account_handlers::query_handler)
-                .post(web_server::bank_account_handlers::command_handler),
-        )
-        .route("/metrics", get(|| async move { metric_handle.render() }))
-        .nest("/graphql", graphql_router)
-        .layer(
-            ServiceBuilder::new()
-                .layer(Extension(bank_account_cqrs.clone()))
-                .layer(Extension(bank_account_query.clone())),
-        )
+    let bank_account_routes = Router::new().route(
+        "/:id",
+        get(web_server::bank_account_handlers::query_handler)
+            .post(web_server::bank_account_handlers::command_handler)
+            .layer(
+                ServiceBuilder::new()
+                    .layer(Extension(bank_account_cqrs.clone()))
+                    .layer(Extension(bank_account_query.clone())),
+            ),
+    );
+
+    let auth_routes = Router::new()
         .route("/login", get(web_server::oauth::login))
         .route("/protected", get(web_server::oauth::protected))
         .route("/logout", post(web_server::oauth::logout))
         .route(
             "/auth/google/callback",
             get(web_server::oauth::google_oauth_callback_handler),
-        )
+        );
+
+    let api_routes = Router::new().nest("/bank-accounts", bank_account_routes);
+
+    let app = Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
+        .nest("/api", api_routes)
+        .merge(auth_routes)
+        .route("/metrics", get(|| async move { metric_handle.render() }))
+        .nest("/graphql", graphql_router)
         .layer(axum::middleware::from_fn_with_state(
             auth_config,
             auth::mw_authorise,

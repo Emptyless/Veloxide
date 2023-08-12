@@ -82,9 +82,22 @@ is_favicon_path {
     input.path == ["favicon.ico"]
 }
 
+is_api_path {
+    input.path[0] == "api"
+}
+
+is_bank_account_path {
+    is_api_path
+    input.path[1] == "bank-accounts"
+}
+
 # Main rule
 allow {
     is_login_route
+}
+
+allow {
+    is_bank_account_path
 }
 
 allow {

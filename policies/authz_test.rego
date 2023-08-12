@@ -68,6 +68,10 @@ test_allow_login_route {
     allow with input as {"method": "GET", "path": ["login"]}
 }
 
+test_allow_bank_account_route {
+    allow with input as {"method": "GET", "path": ["api", "bank-accounts", "123"]}
+}
+
 test_allow_logout_route {
     allow with input as {"method": "POST", "path": ["logout"]}
 }
