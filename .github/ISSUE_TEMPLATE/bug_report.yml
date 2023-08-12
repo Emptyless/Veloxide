@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Before** reporting an issue, make sure to read the [documentation](guide.veloxide.org) and search [existing issues](https://github.com/liamwh/Veloxide/issues). Usage questions such as ***"How do I...?"*** belong in [Discussions](https://github.com/liamwh/Veloxide/discussions).
+        **Before** reporting an issue, make sure to read the [documentation](https://guide.veloxide.org) and search [existing issues](https://github.com/liamwh/Veloxide/issues). Usage questions such as ***"How do I...?"*** belong in [Discussions](https://github.com/liamwh/Veloxide/discussions).
   - type: checkboxes
     attributes:
       label: Did you check docs and existing issues?
@@ -55,6 +55,6 @@ body:
       label: Reproduce
       description: "`cargo.toml` used to produce this issue."
       value: ""
-      render: Lua
+      render: toml
     validations:
       required: false
