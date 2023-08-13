@@ -48,6 +48,9 @@ pub enum Error {
     #[error(transparent)]
     AuthError(#[from] crate::infrastructure::middleware::error::AuthError),
 
+    #[error(transparent)]
+    Tonic(#[from] tonic::transport::Error),
+
     #[error("invalid token format")]
     InvalidTokenFormat,
 
@@ -59,6 +62,9 @@ pub enum Error {
 
     #[error("failed to parse token expiration")]
     FailedToParseTokenExpiration,
+
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
 
 impl IntoResponse for Error {

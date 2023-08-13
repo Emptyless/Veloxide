@@ -9,28 +9,6 @@ dev: fmt
 	docker-compose up -d
 	cargo run -p veloxide-server | bunyan
 
-# Set the configuration to use postgres, then run the application supporting containers, then run the binary
-dev-postgres: set-postgres dev
-
-# Set the configuration to use mysql, then run the application supporting containers, then run the binary
-dev-mysql: set-mysql dev
-
-[private]
-set-db db:
-	ruplacer 'default = \["tracing", "graphql", "frontend", "(postgres|mysql)", "openapi"]' 'default = ["tracing", "graphql", "frontend", "{{db}}", "openapi"]' crates/veloxide-server/Cargo.toml --go
-	ruplacer '(postgres|mysql)' {{db}} bacon.toml --go
-	@echo "Default database in Cargo.toml set to {{db}}"
-
-# Set the database to mysql
-set-mysql: (set-db "mysql")
-	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$MYSQL_DATABASE_URL .env --go
-	@echo "DATABASE_URL set to MYSQL_DATABASE_URL"
-
-# Set the database to postgres
-set-postgres: (set-db "postgres")
-	ruplacer '^DATABASE_URL=.*' DATABASE_URL=$POSTGRES_DATABASE_URL .env --go
-	@echo "DATABASE_URL set to POSTGRES_DATABASE_URL"
-
 # Stop the containers in docker (this stops the docker stack)
 stop:
 	docker-compose down
@@ -113,4 +91,8 @@ restart-opa:
 # Tests the policies defined in /policies
 test-policies:
     opa test ./policies -v
+
+# Creates a sqlx offline file for usage in the CI/CD pipeline
+sqlx-prepare:
+    cd ./backend/crates/veloxide-server && cargo sqlx prepare
 

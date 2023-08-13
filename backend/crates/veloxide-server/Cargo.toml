@@ -15,7 +15,15 @@ tokio = { version = "~1", features = ["full"] }
 tower = "~0"
 axum-prometheus = "~0"
 async-trait = "~0"
-tower-http = {version= "~0", features = ["cors"]}
+tower-http = { version = "~0", features = ["cors"] }
+
+
+## gRPC
+tonic = "0.9"
+tonic-web = "0.9"
+prost = "0.11"
+futures = "0.3"
+axum_tonic = { git = "https://github.com/liamwh/axum-tonic.git" }
 
 # OpenAPI
 utoipa = { version = "~3", features = ["axum_extras"], optional = true }
@@ -33,21 +41,27 @@ uuid = { version = "~1", features = ["v4", "serde"] }
 
 # Persistence
 sqlx = { version = "~0", features = [
-  "runtime-tokio-rustls",
-  "sqlite",
-  "chrono",
-  "postgres",
-  "mysql",
-  "json",
-  "uuid",
-  "offline",
+    "runtime-tokio-rustls",
+    "sqlite",
+    "chrono",
+    "postgres",
+    "mysql",
+    "json",
+    "uuid",
+    "offline",
 ] }
 
 # Observability
 tracing = { version = "~0", features = ["log", "log-always"] }
-opentelemetry = {version ="0.18.0", features = ["rt-tokio"], optional = true }
-opentelemetry-otlp = { version = "0.11.0", features = ["tokio", "metrics"], optional = true }
-tracing-subscriber = { version = "~0", optional = true, features = ["env-filter", "std"]}
+opentelemetry = { version = "0.18.0", features = ["rt-tokio"], optional = true }
+opentelemetry-otlp = { version = "0.11.0", features = [
+    "tokio",
+    "metrics",
+], optional = true }
+tracing-subscriber = { version = "~0", optional = true, features = [
+    "env-filter",
+    "std",
+] }
 tracing-opentelemetry = { version = "~0", optional = true }
 tracing-log = { version = "~0", optional = true, features = ["env_logger"] }
 tracing-bunyan-formatter = { version = "~0", optional = true }
@@ -58,8 +72,8 @@ ts-rs = { version = "~6", optional = true }
 
 # Event sourcing
 cqrs-es = "~0"
-mysql-es = { version = "~0", optional = true}
-postgres-es = { version = "~0", optional = true}
+mysql-es = { version = "~0", optional = true }
+postgres-es = { version = "~0", optional = true }
 
 # OpenID Connect / OAuth2
 oauth2 = "~4"
@@ -90,7 +104,13 @@ serde_with_macros = "3.2.0"
 default = ["tracing", "graphql", "frontend", "postgres", "openapi", "bunyan"]
 mysql = ["mysql-es", "sqlx/mysql"]
 postgres = ["postgres-es", "sqlx/postgres"]
-tracing = ["tracing-log", "tracing-subscriber", "tracing-opentelemetry", "opentelemetry", "opentelemetry-otlp"]
+tracing = [
+    "tracing-log",
+    "tracing-subscriber",
+    "tracing-opentelemetry",
+    "opentelemetry",
+    "opentelemetry-otlp",
+]
 graphql = ["async-graphql", "async-graphql-axum"]
 frontend = ["ts-rs"]
 openapi = ["utoipa", "utoipa-swagger-ui"]
@@ -106,3 +126,6 @@ coverage-helper = "~0"
 [[test]]
 name = "cucumber" # this should be the same as the filename of the test target
 harness = false   # allows Cucumber to print output instead of libtest
+
+[build-dependencies]
+tonic-build = "0.9"

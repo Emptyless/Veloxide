@@ -39,7 +39,6 @@ cfg_if::cfg_if! {
 #[cfg_attr(feature = "graphql", derive(SimpleObject))]
 #[cfg_attr(feature = "frontend", derive(TS))]
 #[ts(export, export_to = "frontend/src/bindings/")]
-#[ts(export)]
 pub struct BankAccountView {
     account_id: Option<String>,
     balance: f64,

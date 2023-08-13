@@ -52,7 +52,7 @@ impl AuthConfiguration {
     }
 }
 
-#[tracing::instrument(ret, err, skip(request, next, user_repo))]
+#[tracing::instrument(ret, err, skip(request, cookies, next, user_repo))]
 pub async fn mw_authenticate<B>(
     cookies: Cookies,
     Extension(user_repo): Extension<UserRepositoryImpl>,
@@ -135,7 +135,7 @@ fn now() -> chrono::DateTime<chrono::Utc> {
 
 const PATH_SEPERATOR: &str = "/";
 
-#[tracing::instrument(skip(request, next), ret, err)]
+#[tracing::instrument(skip(request, next, cookies), ret, err)]
 pub async fn mw_authorise<B>(
     cookies: Cookies,
     method: axum::http::Method,
@@ -205,6 +205,7 @@ pub async fn mw_authorise<B>(
             if allowed {
                 Ok(next.run(request).await)
             } else {
+                //TODO: Replace this string the error message provided by opa if there is one
                 Ok((
                     axum::http::StatusCode::FORBIDDEN,
                     "Access Denied by Policy".to_string(),

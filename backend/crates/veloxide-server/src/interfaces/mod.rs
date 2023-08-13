@@ -8,6 +8,7 @@ use tracing::instrument;
 use utoipa::{ToResponse, ToSchema};
 
 pub mod bank_account;
+pub mod hello;
 
 // Re-exports
 pub use bank_account::*;
