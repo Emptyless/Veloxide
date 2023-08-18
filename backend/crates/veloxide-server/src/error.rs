@@ -29,44 +29,34 @@ pub enum Error {
     ColorEyreError(#[from] color_eyre::Report),
 
     #[error(transparent)]
-    CryptograhyError(#[from] crate::infrastructure::cryptography::error::CryptograhyError),
+    CryptographyError(#[from] crate::infrastructure::cryptography::error::CryptograhyError),
 
     #[error(transparent)]
     AuthError(#[from] crate::infrastructure::middleware::error::AuthError),
 
     #[error(transparent)]
     Tonic(#[from] tonic::transport::Error),
-
-    #[error("invalid token format")]
-    InvalidTokenFormat,
-
-    #[error("failed to decode token identifier")]
-    FailedToDecodeTokenIdentifier,
-
-    #[error("failed to decode token expiration")]
-    FailedToDecodeTokenExpiration,
-
-    #[error("failed to parse token expiration")]
-    FailedToParseTokenExpiration,
-
-    #[error(transparent)]
-    IoError(#[from] std::io::Error),
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let body = self.to_string();
-        (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+        let status = match self {
+            Error::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::AuthError(_) => StatusCode::UNAUTHORIZED,
+            Error::CryptographyError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+        (status, body).into_response()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[tokio::test]
-    async fn test_error() {
-        let err = Error::FailedToDecodeTokenIdentifier;
-        assert_eq!(err.to_string(), "failed to decode token identifier");
+    async fn test_error_converts_to_string_correctly() {
+        let err = Error::Base64DecodeError;
+        assert_eq!(err.to_string(), "failed to decode b64 encoded string");
     }
 }

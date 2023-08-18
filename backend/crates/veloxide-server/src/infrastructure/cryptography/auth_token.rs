@@ -1,7 +1,9 @@
 use crate::infrastructure::cryptography::*;
 use std::str::FromStr;
 
+use axum::response::{IntoResponse, Response};
 use chrono::Utc;
+use hyper::StatusCode;
 
 use super::encoding::*;
 use crate::infrastructure::cryptography::error::*;
@@ -15,7 +17,7 @@ pub struct AuthToken {
 }
 
 impl FromStr for AuthToken {
-    type Err = crate::error::Error;
+    type Err = TokenValidationError;
     fn from_str(token_str: &str) -> std::result::Result<Self, Self::Err> {
         let splits: Vec<&str> = token_str.split('.').collect();
         if splits.len() != 3 {
@@ -71,4 +73,43 @@ pub fn new_web_token(
         expiration,
         signature,
     })
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum TokenValidationError {
+    #[error("invalid token format")]
+    InvalidTokenFormat,
+
+    #[error("failed to decode token identifier")]
+    FailedToDecodeTokenIdentifier,
+
+    #[error("failed to decode token expiration")]
+    FailedToDecodeTokenExpiration,
+
+    #[error("failed to parse token expiration")]
+    FailedToParseTokenExpiration,
+}
+
+impl IntoResponse for TokenValidationError {
+    fn into_response(self) -> Response {
+        let body = self.to_string();
+        let status = match self {
+            TokenValidationError::InvalidTokenFormat
+            | TokenValidationError::FailedToDecodeTokenIdentifier
+            | TokenValidationError::FailedToDecodeTokenExpiration
+            | TokenValidationError::FailedToParseTokenExpiration => StatusCode::BAD_REQUEST,
+        };
+        (status, body).into_response()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_failed_to_decode_token_identier_converts_to_correct_string() {
+        let err = TokenValidationError::FailedToDecodeTokenIdentifier;
+        assert_eq!(err.to_string(), "failed to decode token identifier");
+    }
 }
