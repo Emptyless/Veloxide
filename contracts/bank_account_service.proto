@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package bank_account_service;
+
+// Service definition
+service BankAccountService {
+    rpc GetBankAccount (GetBankAccountRequest) returns (GetBankAccountResponse);
+}
+
+// Bank account transaction
+message AccountTransaction {
+    string description = 1;
+    double amount = 2;
+}
+
+// Bank account view
+message BankAccountView {
+    string account_id = 1;
+    double balance = 2;
+    repeated string written_checks = 3;
+    repeated AccountTransaction account_transactions = 4;
+}
+
+// Request to get bank account details
+message GetBankAccountRequest {
+    string id = 1; // Bank account ID
+}
+
+// Response for getting bank account details
+message GetBankAccountResponse {
+    BankAccountView account_view = 1;
+}
+

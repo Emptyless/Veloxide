@@ -1,6 +1,7 @@
 pub mod auth_utils;
 pub mod cryptography;
 pub mod db;
+pub mod grpc;
 pub mod logging;
 pub mod middleware;
 pub mod observability;

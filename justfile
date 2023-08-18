@@ -2,28 +2,31 @@ set dotenv-load := true
 
 # Show available commands
 default:
-  @just --list --justfile {{justfile()}}
+    @just --list --justfile {{justfile()}}
 
 # Run the application supporting containers, then run the binary
-dev: fmt
-	docker-compose up -d
-	cargo run -p veloxide-server | bunyan
+dev: fmt up migrate
+    cargo run -p veloxide-server | bunyan
+
+# Run the application supporting containers, then run the frontend with hot reloading
+dev-frontend: 
+    cd ./frontends/sveltekit && pnpm run dev
 
 # Stop the containers in docker (this stops the docker stack)
 stop:
-	docker-compose down
+    docker-compose down
 
 # Restart the containers in docker (this restarts the docker stack)
 restart: stop dev
 
 # Generates a code coverage report to be viewed in your IDE.
 cover: fmt
-	cargo llvm-cov report --lcov --output-path ./coverage/lcov.info
+    cargo llvm-cov report --lcov --output-path ./coverage/lcov.info
 
 # Generate a HTML coverage report and open it
 coverhtml: fmt
-	cargo llvm-cov --html
-	open target/llvm-cov/html/index.html
+    cargo llvm-cov --html
+    open target/llvm-cov/html/index.html
 
 # Install the required tools for development with Veloxide
 install-required:
@@ -69,17 +72,21 @@ install-all: install-required install-recommended
 
 # Opens the user guide in your browser
 guide:
-	mdbook watch ./docs/guide --open
+    mdbook watch ./docs/guide --open
 
 [private]
 fmt-nightly:
-  rustup default nightly
-  cargo fmt --all
-  rustup default stable
+    rustup default nightly
+    cargo fmt --all
+    rustup default stable
 
 [private]
 fmt:
-  cargo fmt --all
+    cargo fmt --all
+
+[private]
+up:
+    docker-compose up -d
 
 # Restarts the OPA container, useful when you've changed the policy
 restart-opa:
@@ -95,4 +102,21 @@ test-policies:
 # Creates a sqlx offline file for usage in the CI/CD pipeline
 sqlx-prepare:
     cd ./backend/crates/veloxide-server && cargo sqlx prepare
+
+# Generate the stubs for the frontend(s) from the protobuf definitions
+gen:
+    cd ./contracts && protoc --proto_path=. ./*.proto --ts_out=../frontends/sveltekit/src/lib/stubs --plugin=protoc-gen-ts=../frontends/sveltekit/node_modules/.bin/protoc-gen-ts
+
+ 
+# Perform the database migrations
+migrate:
+    cd ./backend/crates/veloxide-server/ && cargo sqlx database create && cargo sqlx migrate run
+
+# Deploy the backend to fly.io
+deploy:
+    act -j deploy -s FLY_API_TOKEN=$FLY_API_TOKEN
+
+# Check unused dependencies
+udeps:
+    cargo +nightly udeps
 

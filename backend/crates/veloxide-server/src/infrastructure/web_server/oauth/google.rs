@@ -12,7 +12,6 @@ pub const GOOGLE_REVOCATION_URI: &str = "https://oauth2.googleapis.com/revoke";
 pub const GOOGLE_USERINFO_URL: &str = "https://www.googleapis.com/oauth2/v2/userinfo?oauth_token=";
 
 pub fn build_google_oauth_client() -> BasicClient {
-    dotenvy::dotenv().expect("Failed to read .env file");
     let client_id = dotenvy::var(GOOGLE_CLIENT_ID_ENV_VAR).expect("GOOGLE_CLIENT_ID not set");
     let client_secret =
         dotenvy::var(GOOGLE_CLIENT_SECRET_ENV_VAR).expect("GOOGLE_CLIENT_SECRET not set");

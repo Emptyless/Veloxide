@@ -12,10 +12,13 @@ RUN cargo new --bin ${APP_NAME}
 
 WORKDIR ./${APP_NAME}
 
-COPY . ./
+COPY ./crates/veloxide-server ./
+COPY ./contracts/ ./
+COPY ./contracts/ ./veloxide-server
 
-ARG SQLX_OFFLINE=true
-ARG DATABASE_KIND="mysql"
+ENV CONTRACTS_PATH="./contracts"
+ENV SQLX_OFFLINE=true
+ARG DATABASE_KIND="postgres"
 ARG FEATURES="tracing,graphql,frontend,openapi,bunyan"
 
 RUN apt-get update && apt-get install -y protobuf-compiler
@@ -36,7 +39,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Amsterdam \
-    APP_USER=appuser
+    APP_USER=appuser \
+    AUTHZ_ENABLED=false
 
 RUN groupadd $APP_USER \
     && useradd -g $APP_USER $APP_USER \

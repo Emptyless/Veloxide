@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use crate::infrastructure::cryptography::*;
 use crate::infrastructure::web_server::oauth::handlers::auth::auth_config;
-use crate::infrastructure::web_server::*;
+use crate::infrastructure::{cryptography::*, web_server::configuration::DEFAULT_REDIRECT_PATH};
 use axum::{
     extract::{Extension, Query},
     response::{IntoResponse, Redirect},

@@ -4,8 +4,6 @@
 //! Notes:
 //!     - The strategy is to start with one Error type for the whole application and then seggregate as needed.
 //!     - Since everything is typed from the start, renaming and refactoring become relatively trivial.
-//!     - By best practices, `anyhow` is not used in application code, but can be used in unit or integration test (will be in dev_dependencies when used)
-//!
 
 use axum::response::{IntoResponse, Response};
 use hyper::StatusCode;
@@ -21,20 +19,8 @@ pub enum Error {
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
 
-    #[error(transparent)]
-    SetLoggerError(#[from] log::SetLoggerError),
-
-    #[error(transparent)]
-    ParseIntError(#[from] std::num::ParseIntError),
-
     #[error("failed to decode b64 encoded string")]
     Base64DecodeError,
-
-    #[error(transparent)]
-    RedisError(#[from] redis::RedisError),
-
-    #[error(transparent)]
-    ClaimsVerificationError(#[from] openidconnect::ClaimsVerificationError),
 
     #[error(transparent)]
     TraceError(#[from] opentelemetry::trace::TraceError),

@@ -13,3 +13,11 @@ impl Query<BankAccount> for SimpleLoggingQuery {
         }
     }
 }
+
+pub fn configure_logging() {
+    tracing_log::LogTracer::builder()
+        .ignore_crate("sqlx")
+        .with_max_level(log::LevelFilter::Info)
+        .init()
+        .expect("could not initialize log tracer");
+}

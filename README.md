@@ -70,7 +70,7 @@ Create your own app:
 > just install-required
 
 # Set the environment to use the Postgres config, start the supporting containers, and then run the app
-> just dev-postgres
+> just dev
 
 # Once done, open `my-app/` in your IDE
 

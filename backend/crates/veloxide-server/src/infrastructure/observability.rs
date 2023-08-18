@@ -9,7 +9,7 @@ const OBSERVABILITY_SERVICE_NAME_ENV_VAR: &str = "OBSERVABILITY_SERVICE_NAME";
 const OBSERVABILITY_SERVICE_NAME_DEFAULT: &str = "veloxide-server";
 
 #[tracing::instrument]
-pub async fn configure_observability() -> std::result::Result<(), crate::error::Error> {
+pub fn configure_observability() -> std::result::Result<(), crate::error::Error> {
     let otel_exporter_endpoint =
         dotenvy::var(OTEL_EXPORTER_OTLP_ENDPOINT_ENV_VAR).unwrap_or_else(|_| {
             tracing::warn!(
@@ -39,7 +39,6 @@ pub async fn configure_observability() -> std::result::Result<(), crate::error::
 
     // Create a tracing layer with the configured tracer
     let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
-
     let filter = tracing_subscriber::EnvFilter::from_default_env();
 
     cfg_if::cfg_if! {

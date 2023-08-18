@@ -24,6 +24,10 @@ cfg_if::cfg_if! {
                 .connect(db_connection_url.as_str())
                 .await?;
 
+            sqlx::migrate!()
+                .run(&pool)
+                .await.expect("failed to run migrations");
+
             Ok(pool)
         }
         pub async fn get_db_connection() -> crate::prelude::Result<Pool<Postgres>> {

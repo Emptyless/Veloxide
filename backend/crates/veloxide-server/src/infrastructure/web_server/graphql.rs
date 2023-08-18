@@ -67,7 +67,7 @@ struct MutationRoot(BankAccountGraphQlMutation);
 cfg_if! {
     if #[cfg(feature = "postgres")] {
         #[instrument(skip(bank_account_view_repsitory, bank_account_cqrs_framework))]
-        pub async fn new_graphql_router(
+        pub fn new_graphql_router(
             bank_account_cqrs_framework: Arc<PostgresCqrs<BankAccount>>,
             bank_account_view_repsitory: Arc<PostgresViewRepository<BankAccountView, BankAccount>>,
         ) -> Router {
@@ -89,7 +89,7 @@ cfg_if! {
         }
     } else if #[cfg(feature = "mysql")] {
         #[instrument(skip(bank_account_view_repsitory, bank_account_cqrs_framework))]
-        pub async fn new_graphql_router(
+        pub fn new_graphql_router(
             bank_account_cqrs_framework: Arc<MysqlCqrs<BankAccount>>,
             bank_account_view_repsitory: Arc<MysqlViewRepository<BankAccountView, BankAccount>>,
         ) -> Router {

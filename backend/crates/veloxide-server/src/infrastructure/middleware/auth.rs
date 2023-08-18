@@ -22,32 +22,40 @@ use std::sync::OnceLock;
 pub struct AuthConfiguration {
     pub token_key: String,
     #[serde_as(as = "serde_with::DurationSeconds<i64>")]
-    pub token_duration_seconds: chrono::Duration,
+    pub token_duration_minutes: chrono::Duration,
     pub policy_server_url: String,
+    pub authz_enabled: bool,
 }
 
 pub fn auth_config() -> &'static AuthConfiguration {
     static INSTANCE: OnceLock<AuthConfiguration> = OnceLock::new();
-
-    INSTANCE.get_or_init(AuthConfiguration::init_from_env)
+    INSTANCE.get_or_init(AuthConfiguration::from_env)
 }
 
 impl AuthConfiguration {
-    pub fn init_from_env() -> AuthConfiguration {
+    pub fn from_env() -> AuthConfiguration {
         let token_key = dotenvy::var("TOKEN_KEY").expect("TOKEN_KEY must be set");
-        let token_duration_seconds: i64 = dotenvy::var("TOKEN_DURATION_SECONDS")
-            .unwrap_or("86400".to_string())
+        let token_duration_minutes: i64 = dotenvy::var("TOKEN_DURATION_MINUTES")
+            .unwrap_or("480".to_string())
             .parse()
-            .expect("TOKEN_DURATION_SECONDS must be a valid integer");
+            .expect("TOKEN_DURATION_MINUTES must be a valid integer");
 
-        let token_duration = chrono::Duration::seconds(token_duration_seconds);
-        let policy_server_url =
-            dotenvy::var("POLICY_SERVER_URL").expect("POLICY_SERVER_URL must be set");
+        let token_duration = chrono::Duration::minutes(token_duration_minutes);
+        let authz_enabled = dotenvy::var("AUTHZ_ENABLED")
+            .unwrap_or("true".to_string())
+            .parse()
+            .expect("Expected boolean value for AUTHZ_ENABLED");
+
+        let policy_server_url = match authz_enabled {
+            true => dotenvy::var("POLICY_SERVER_URL").expect("POLICY_SERVER_URL must be set"),
+            false => String::new(),
+        };
 
         AuthConfiguration {
             token_key,
-            token_duration_seconds: token_duration,
+            token_duration_minutes: token_duration,
             policy_server_url,
+            authz_enabled,
         }
     }
 }
@@ -91,7 +99,7 @@ async fn resolve_user_data(
     validate_web_token(&token, &user.token_salt.to_string())
         .map_err(|_| AuthError::TokenValidationFailed)?;
 
-    let new_expiration = Some(token.expiration + (auth_config().token_duration_seconds));
+    let new_expiration = Some(token.expiration + (auth_config().token_duration_minutes));
     set_auth_cookie(cookies, &token.to_string(), new_expiration);
 
     Ok(user.into())
@@ -144,6 +152,10 @@ pub async fn mw_authorise<B>(
     request: Request<B>,
     next: Next<B>,
 ) -> Result<impl IntoResponse, AuthError> {
+    if !&auth_config().authz_enabled {
+        return Ok(next.run(request).await);
+    }
+    let policy_server_url = &auth_config().policy_server_url;
     let auth_token_result = get_auth_token(&cookies).ok();
     let path = original_uri
         .path()
@@ -184,7 +196,6 @@ pub async fn mw_authorise<B>(
     };
 
     let client = reqwest::Client::new();
-    let policy_server_url = &auth_config().policy_server_url;
     let res = client.post(policy_server_url).json(&input).send().await;
 
     match res {

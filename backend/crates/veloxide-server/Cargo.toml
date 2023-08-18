@@ -12,11 +12,10 @@ authors = ["Liam Woodleigh-Hardinge <liam.woodleigh@gmail.com>"]
 axum = { version = "~0", features = ["macros"] }
 hyper = { version = "~0", features = ["full"] }
 tokio = { version = "~1", features = ["full"] }
-tower = "~0"
-axum-prometheus = "~0"
-async-trait = "~0"
-tower-http = { version = "~0", features = ["cors"] }
-
+tower = "~0.4"
+axum-prometheus = "~0.4"
+async-trait = "~0.1"
+tower-http = { version = "~0.4", features = ["cors"] }
 
 ## gRPC
 tonic = "0.9"
@@ -37,7 +36,9 @@ async-graphql-axum = { version = "~5", optional = true }
 serde = { version = "~1", features = ["derive"] }
 serde_json = "~1"
 serde_yaml = "~0"
-uuid = { version = "~1", features = ["v4", "serde"] }
+serde_with = { version = "~3.2", features = ["chrono"] }
+serde_with_macros = "3.2.0"
+uuid = { version = "~1.4", features = ["v4", "serde"] }
 
 # Persistence
 sqlx = { version = "~0", features = [
@@ -58,14 +59,14 @@ opentelemetry-otlp = { version = "0.11.0", features = [
     "tokio",
     "metrics",
 ], optional = true }
-tracing-subscriber = { version = "~0", optional = true, features = [
+tracing-subscriber = { version = "~0.3", optional = true, features = [
     "env-filter",
     "std",
 ] }
-tracing-opentelemetry = { version = "~0", optional = true }
-tracing-log = { version = "~0", optional = true, features = ["env_logger"] }
-tracing-bunyan-formatter = { version = "~0", optional = true }
-
+tracing-opentelemetry = { version = "~0.18", optional = true }
+tracing-log = { version = "~0.1", optional = true, features = ["env_logger"] }
+tracing-bunyan-formatter = { version = "~0.3", optional = true }
+log = "~0.4"
 
 # Frontend
 ts-rs = { version = "~6", optional = true }
@@ -75,30 +76,29 @@ cqrs-es = "~0"
 mysql-es = { version = "~0", optional = true }
 postgres-es = { version = "~0", optional = true }
 
-# OpenID Connect / OAuth2
+# Auth
 oauth2 = "~4"
-openidconnect = "~2"
 url = "~2"
 const_format = "~0"
 tower-cookies = "~0"
-redis = { version = "~0", features = ["tokio-comp"] }
-
-# Misc
-thiserror = "~1"
-log = "~0"
-dotenvy = "~0"
-chrono = "~0"
-derivative = "~2"
-cfg-if = "~1"
-color-eyre = "0.6.2"
-reqwest = { version = "0.11.18", features = ["json"] }
 email_address = "0.2.4"
+reqwest = { version = "0.11.18", features = ["json"] }
 base64 = "0.21.2"
 hmac = "0.12.1"
 sha2 = "0.10.7"
+
+# Time
 time = "0.3.25"
-serde_with = { version = "3.2.0", features = ["chrono"] }
-serde_with_macros = "3.2.0"
+chrono = "~0"
+
+# Error handling
+color-eyre = "0.6.2"
+thiserror = "~1"
+
+# Misc
+dotenvy = "~0"
+derivative = "~2"
+cfg-if = "~1"
 
 [features]
 default = ["tracing", "graphql", "frontend", "postgres", "openapi", "bunyan"]
@@ -117,7 +117,6 @@ openapi = ["utoipa", "utoipa-swagger-ui"]
 bunyan = ["tracing-bunyan-formatter"]
 
 [dev-dependencies]
-anyhow = "~1"
 pretty_assertions = "~1"
 cucumber = "~0"
 mockall = { version = "~0" }

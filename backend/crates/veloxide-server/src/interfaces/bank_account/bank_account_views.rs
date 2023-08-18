@@ -40,10 +40,10 @@ cfg_if::cfg_if! {
 #[cfg_attr(feature = "frontend", derive(TS))]
 #[ts(export, export_to = "frontend/src/bindings/")]
 pub struct BankAccountView {
-    account_id: Option<String>,
-    balance: f64,
-    written_checks: Vec<String>,
-    account_transactions: Vec<AccountTransaction>,
+    pub account_id: Option<String>, //TODO: Investigate why this is an option.
+    pub balance: f64,
+    pub written_checks: Vec<String>,
+    pub account_transactions: Vec<AccountTransaction>,
 }
 
 // This updates the view with events as they are committed.
@@ -88,8 +88,8 @@ impl View<BankAccount> for BankAccountView {
 #[cfg_attr(feature = "frontend", derive(TS))]
 #[ts(export, export_to = "frontend/src/bindings/")]
 pub struct AccountTransaction {
-    description: String,
-    amount: f64,
+    pub description: String,
+    pub amount: f64,
 }
 impl AccountTransaction {
     fn new(description: &str, amount: f64) -> Self {
