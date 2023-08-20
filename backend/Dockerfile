@@ -10,11 +10,11 @@ ARG APP_NAME="veloxide-server"
 
 RUN cargo new --bin ${APP_NAME}
 
-WORKDIR ./${APP_NAME}
+WORKDIR /${APP_NAME}
 
-COPY ./crates/veloxide-server ./
+COPY ./crates/${APP_NAME} ./
 COPY ./contracts/ ./
-COPY ./contracts/ ./veloxide-server
+COPY ./contracts/ ./${APP_NAME}
 
 ENV CONTRACTS_PATH="./contracts"
 ENV SQLX_OFFLINE=true
@@ -32,6 +32,8 @@ RUN cargo build --release --features ${DATABASE_KIND},${FEATURES} --no-default-f
 FROM debian:buster-slim
 
 ARG APP=/usr/src/app
+ARG GOOGLE_CLIENT_ID
+ARG GOOGLE_CLIENT_SECRET
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
@@ -40,7 +42,16 @@ RUN apt-get update && apt-get install -y \
 
 ENV TZ=Europe/Amsterdam \
     APP_USER=appuser \
-    AUTHZ_ENABLED=false
+    AUTHZ_ENABLED=false \
+    OBSERVABILITY_SERVICE_NAME="veloxide-server" \
+    OTEL_EXPORTER_OTLP_ENDPOINT="http://tempo:4317" \
+    RUST_LOG="info" \
+    DATABASE_URL="postgresql://postgres:thisisnotsecure@postgres:5432/veloxidedb" \
+    HTTP_PORT="8080" \
+    TOKEN_KEY="ca3e5d12-61dd-4d1e-9d98-10c308d31531" \
+    TOKEN_DURATION_MINUTES="1440" \
+    POLICY_SERVER_URL="http://opa:8181/v1/data/httpapi/authz" \
+    GOOGLE_REDIRECT_URL="http://localhost:8080/auth/google/callback"
 
 RUN groupadd $APP_USER \
     && useradd -g $APP_USER $APP_USER \

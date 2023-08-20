@@ -30,7 +30,7 @@ impl Oauth2StateRepository for PostgresOauth2StateRepository {
         Ok(state)
     }
 
-    #[tracing::instrument(skip(self), ret, err)]
+    #[tracing::instrument(skip(self), err, state, fields(state_id = %state.id))]
     async fn create_state(&mut self, state: OAuth2State) -> Result<()> {
         let query = sqlx::query!(
             "INSERT INTO oauth2_states (id, csrf_state, code_verifier, return_url, created_at) VALUES ($1, $2, $3, $4, $5)",

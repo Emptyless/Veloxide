@@ -5,11 +5,19 @@
 	import '@skeletonlabs/skeleton/styles/skeleton.css';
 	// Most of the app wide CSS should be put in this file
 	import '../app.postcss';
-
+	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+	import { storePopup } from '@skeletonlabs/skeleton';
+	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 	import { Toast, AppShell } from '@skeletonlabs/skeleton';
 	import Analytics from '$lib/components/Analytics.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import FooterBar from '$lib/components/FooterBar.svelte';
+	import { setContext } from 'svelte';
+	import { writable } from 'svelte/store';
+	export let data: any;
+	const user = writable();
+	$: user.set(data.user);
+	setContext('user', user);
 </script>
 
 <Toast />

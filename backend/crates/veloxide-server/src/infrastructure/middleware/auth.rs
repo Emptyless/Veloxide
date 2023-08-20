@@ -60,8 +60,31 @@ impl AuthConfiguration {
     }
 }
 
-#[tracing::instrument(ret, err, skip(request, cookies, next, user_repo))]
-pub async fn mw_authenticate<B>(
+#[tracing::instrument(
+    err,
+    skip(cookies, next, user_repo, request),
+    fields(
+        method = %request.method(),
+        uri = %request.uri(),
+        version = ?request.version().clone(),
+        host = ?request.headers().get("host"),
+        connection = ?request.headers().get("connection"),
+        sec_ch_ua = ?request.headers().get("sec-ch-ua"),
+        sec_ch_ua_mobile = ?request.headers().get("sec-ch-ua-mobile"),
+        sec_ch_ua_platform = ?request.headers().get("sec-ch-ua-platform"),
+        upgrade_insecure_requests = ?request.headers().get("upgrade-insecure-requests"),
+        user_agent = ?request.headers().get("user-agent"),
+        accept = ?request.headers().get("accept"),
+        sec_fetch_site = ?request.headers().get("sec-fetch-site"),
+        sec_fetch_mode = ?request.headers().get("sec-fetch-mode"),
+        sec_fetch_user = ?request.headers().get("sec-fetch-user"),
+        sec_fetch_dest = ?request.headers().get("sec-fetch-dest"),
+        referer = ?request.headers().get("referer"),
+        accept_encoding = ?request.headers().get("accept-encoding"),
+        accept_language = ?request.headers().get("accept-language"),
+    )
+)]
+pub async fn mw_authenticate<B: std::fmt::Debug>(
     cookies: Cookies,
     Extension(user_repo): Extension<UserRepositoryImpl>,
     mut request: Request<B>,
@@ -80,10 +103,10 @@ pub async fn mw_authenticate<B>(
     Ok(next.run(request).await)
 }
 
-#[tracing::instrument(ret, err, level = "info")]
+#[tracing::instrument(skip(cookies, user_repo), ret, err, level = "info")]
 async fn resolve_user_data(
     cookies: &Cookies,
-    mut user_repo: UserRepositoryImpl,
+    user_repo: UserRepositoryImpl,
 ) -> Result<UserData, AuthError> {
     let token_cookie_value = get_user_token_cookie_value(cookies)?;
 
@@ -105,7 +128,7 @@ async fn resolve_user_data(
     Ok(user.into())
 }
 
-#[tracing::instrument(ret, err, level = "debug")]
+#[tracing::instrument(ret, err, level = "debug", skip(token, token_salt))]
 fn validate_web_token(token: &AuthToken, token_salt: &str) -> crate::prelude::Result<()> {
     let key = &auth_config().token_key.as_bytes();
     validate_token_signature_and_expiry(token, token_salt, key)?;
@@ -113,7 +136,7 @@ fn validate_web_token(token: &AuthToken, token_salt: &str) -> crate::prelude::Re
 }
 
 /// Validate if the origin_token signature match what it is supposed to match.
-#[tracing::instrument(ret, err, level = "debug", skip(key))]
+#[tracing::instrument(ret, err, level = "debug", skip(key, origin_token, salt))]
 fn validate_token_signature_and_expiry(
     origin_token: &AuthToken,
     salt: &str,
@@ -143,7 +166,30 @@ fn now() -> chrono::DateTime<chrono::Utc> {
 
 const PATH_SEPERATOR: &str = "/";
 
-#[tracing::instrument(skip(request, next, cookies), ret, err)]
+#[tracing::instrument(
+    err,
+    skip(cookies, next, request, headers),
+    fields(
+        method = %request.method(),
+        uri = %request.uri(),
+        version = ?request.version().clone(),
+        host = ?request.headers().get("host"),
+        connection = ?request.headers().get("connection"),
+        sec_ch_ua = ?request.headers().get("sec-ch-ua"),
+        sec_ch_ua_mobile = ?request.headers().get("sec-ch-ua-mobile"),
+        sec_ch_ua_platform = ?request.headers().get("sec-ch-ua-platform"),
+        upgrade_insecure_requests = ?request.headers().get("upgrade-insecure-requests"),
+        user_agent = ?request.headers().get("user-agent"),
+        accept = ?request.headers().get("accept"),
+        sec_fetch_site = ?request.headers().get("sec-fetch-site"),
+        sec_fetch_mode = ?request.headers().get("sec-fetch-mode"),
+        sec_fetch_user = ?request.headers().get("sec-fetch-user"),
+        sec_fetch_dest = ?request.headers().get("sec-fetch-dest"),
+        referer = ?request.headers().get("referer"),
+        accept_encoding = ?request.headers().get("accept-encoding"),
+        accept_language = ?request.headers().get("accept-language"),
+    )
+)]
 pub async fn mw_authorise<B>(
     cookies: Cookies,
     method: axum::http::Method,
@@ -163,8 +209,6 @@ pub async fn mw_authorise<B>(
         .trim_end_matches(PATH_SEPERATOR)
         .split(PATH_SEPERATOR)
         .collect::<Vec<&str>>();
-    tracing::info!(path = ?path);
-    tracing::info!(headers = ?headers);
     let header_hashmap: std::collections::HashMap<String, String> = headers
         .iter()
         .map(|(k, v)| (k.to_string(), v.to_str().unwrap_or("").to_string()))
@@ -197,7 +241,6 @@ pub async fn mw_authorise<B>(
 
     let client = reqwest::Client::new();
     let res = client.post(policy_server_url).json(&input).send().await;
-
     match res {
         Ok(opa_res) => {
             let opa_res_body = match opa_res.json::<serde_json::Value>().await {
@@ -212,7 +255,7 @@ pub async fn mw_authorise<B>(
             };
 
             let allowed = opa_res_body["result"]["allow"].as_bool().unwrap_or(false);
-
+            tracing::info!(%opa_res_body);
             if allowed {
                 Ok(next.run(request).await)
             } else {

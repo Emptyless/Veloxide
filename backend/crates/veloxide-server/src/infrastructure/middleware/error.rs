@@ -1,4 +1,5 @@
 use axum::response::{IntoResponse, Response};
+use hyper::StatusCode;
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthError {
@@ -13,6 +14,9 @@ pub enum AuthError {
 
     #[error("token validation failed")]
     TokenValidationFailed,
+
+    #[error("invalid return url")]
+    InvalidReturnUrl,
 
     #[error("token signature not matching")]
     TokenSignatureNotMatching,
@@ -38,7 +42,22 @@ pub enum AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
+        let status_code = match self {
+            AuthError::WithoutCode => StatusCode::BAD_REQUEST,
+            AuthError::TokenExpired => StatusCode::UNAUTHORIZED,
+            AuthError::AuthTokenNotFound => StatusCode::UNAUTHORIZED,
+            AuthError::TokenValidationFailed => StatusCode::UNAUTHORIZED,
+            AuthError::InvalidReturnUrl => StatusCode::BAD_REQUEST,
+            AuthError::TokenSignatureNotMatching => StatusCode::UNAUTHORIZED,
+            AuthError::CsrfStateMismatch => StatusCode::FORBIDDEN,
+            AuthError::InvalidTokenFormat => StatusCode::BAD_REQUEST,
+            AuthError::EmailAddressNotVerified => StatusCode::FORBIDDEN,
+            AuthError::StateStoreFailed => StatusCode::INTERNAL_SERVER_ERROR,
+            AuthError::FailedToGetUser => StatusCode::INTERNAL_SERVER_ERROR,
+            AuthError::CryptograhyError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+
         let body = self.to_string();
-        (axum::http::StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
+        (status_code, body).into_response()
     }
 }

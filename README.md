@@ -33,7 +33,7 @@ Its key qualities are:
 - **Fewer bugs**: All components of Veloxide are written in [Rust](https://www.rust-lang.org), which is known for its safety and reliability [[1]](https://www.infoq.com/news/2021/04/rust-linux-kernel-development/) [[2]](https://security.googleblog.com/2023/01/supporting-use-of-rust-in-chromium.html) [[3]](https://security.googleblog.com/2022/12/memory-safe-languages-in-android-13.html)
 - **Highly performant**: Veloxide is built on top of the [Tokio](https://tokio.rs) async runtime and [Axum framework](https://github.com/tokio-rs/axum), which leverage the power of Rust's [async/await syntax](https://doc.rust-lang.org/reference/expressions/await-expr.html) and [zero-cost abstractions](https://doc.rust-lang.org/beta/embedded-book/static-guarantees/zero-cost-abstractions.html) to give blazingly fast bare-metal performance.
 - **Cloud native**: Veloxide comes pre-configured with [OpenTelemetry](https://opentelemetry.io/) for distributed tracing and a /metrics endpoint preconfigured for collection from [Prometheus](https://prometheus.io/).
-- **Standards-based**: Veloxide leverages the open standards for APIs: [OpenAPI](https://github.com/OAI/OpenAPI-Specification), [JSON Schema](https://json-schema.org/specification.html) and [GraphQL](https://graphql.org/). You choose how you want your API to be consumed.
+- **Standards-based**: Veloxide leverages the best techniques to describe and expose your API: [OpenAPI](https://github.com/OAI/OpenAPI-Specification) with [JSON Schema](https://json-schema.org/specification.html), and [protocol buffers](https://protobuf.dev/) with [gRPC](https://grpc.io/). You choose how you want your API to be consumed.
 
 ## Design Patterns
 

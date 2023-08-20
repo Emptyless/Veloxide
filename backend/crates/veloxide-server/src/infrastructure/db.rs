@@ -1,7 +1,7 @@
 pub use tracing::*;
 
 #[instrument]
-async fn get_database_environment_variable() -> String {
+fn get_database_environment_variable() -> String {
     tracing::event!(Level::INFO, "getting database environment variable");
     let db_url = dotenvy::var("DATABASE_URL").expect("DATABASE_URL must be set");
     tracing::event!(Level::INFO, "database environment variable set.");
@@ -13,17 +13,11 @@ cfg_if::cfg_if! {
         use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
         #[instrument]
         pub async fn get_db_connection_postgres_sqlx() -> crate::prelude::Result<Pool<Postgres>> {
-            let db_connection_url = get_database_environment_variable().await;
-
-            tracing::event!(
-                Level::INFO,
-                "connecting to postgres db with connection string: {db_connection_url}"
-            );
+            let db_connection_url = get_database_environment_variable();
             let pool = PgPoolOptions::new()
                 .max_connections(5)
                 .connect(db_connection_url.as_str())
                 .await?;
-
             sqlx::migrate!()
                 .run(&pool)
                 .await.expect("failed to run migrations");
@@ -38,17 +32,14 @@ cfg_if::cfg_if! {
 
         #[instrument]
         pub async fn get_db_connection_mysql_sqlx() -> crate::prelude::Result<Pool<MySql>> {
-            let db_connection_url = get_database_environment_variable().await;
-
-            tracing::event!(
-                Level::INFO,
-                "connecting to mysql db with connection string: {db_connection_url}"
-            );
+            let db_connection_url = get_database_environment_variable();
             let pool = MySqlPoolOptions::new()
                 .max_connections(5)
                 .connect(db_connection_url.as_str())
                 .await?;
-
+            sqlx::migrate!()
+                .run(&pool)
+                .await.expect("failed to run migrations");
             Ok(pool)
         }
         pub async fn get_db_connection() -> crate::prelude::Result<Pool<MySql>> {

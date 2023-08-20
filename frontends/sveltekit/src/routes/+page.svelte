@@ -1,6 +1,5 @@
 <script lang="ts">
 	import GetBankAccount from '$lib/components/GetBankAccount.svelte';
-
 	import GreeterButton from '$lib/components/GreeterButton.svelte';
 </script>
 

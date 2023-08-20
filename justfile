@@ -17,7 +17,7 @@ stop:
     docker-compose down
 
 # Restart the containers in docker (this restarts the docker stack)
-restart: stop dev
+restart: stop up
 
 # Generates a code coverage report to be viewed in your IDE.
 cover: fmt
@@ -37,9 +37,6 @@ install-required:
 
 	@echo "Installing sqlx-cli (database migrations: https://crates.io/crates/sqlx-cli)"
 	cargo install sqlx-cli --no-default-features --features postgres,mysql,sqlite,rustls
-
-	@echo "Installing ruplacer (replacement tool: https://github.com/your-tools/ruplacer)"
-	cargo install ruplacer
 
 	@echo "Installing bunyan (log parser tool: https://github.com/LukeMathWalker/bunyan)"
 	cargo install bunyan
@@ -84,9 +81,11 @@ fmt-nightly:
 fmt:
     cargo fmt --all
 
-[private]
+# Start the docker stack
 up:
+    cp -r ./contracts ./backend/crates/veloxide-server/contracts
     docker-compose up -d
+    rm -rf ./backend/crates/veloxide-server/contracts
 
 # Restarts the OPA container, useful when you've changed the policy
 restart-opa:

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package auth;
+
+service Authentication {
+    rpc GetCurrentUser (GetCurrentUserRequest) returns (GetUserResponse);
+}
+
+message UserView {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    bool email_verified = 4;
+    string image = 5;
+}
+
+message GetUserResponse {
+    UserView user = 1;
+}
+
+message GetCurrentUserRequest {
+    string token = 1;
+}

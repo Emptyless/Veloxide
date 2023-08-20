@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
+	import ProfileButton from './ProfileButton.svelte';
 </script>
 
 <AppBar gridColumns="grid-cols-3" slotDefault="place-self-center" slotTrail="place-content-end">
@@ -31,5 +32,6 @@
 				/></svg
 			>
 		</a>
+		<ProfileButton />
 	</svelte:fragment>
 </AppBar>

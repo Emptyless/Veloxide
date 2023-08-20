@@ -4,7 +4,7 @@
 	import { bankAccountClient } from '$lib/bankAccountClient';
 	import type { GetBankAccountRequest } from '$lib/stubs/bank_account_service';
 
-	let accountId = '123'; // Using camelCase as it's more conventional in JavaScript
+	let accountId = '123';
 	async function getBankAccount(): Promise<void> {
 		try {
 			const request: GetBankAccountRequest = { id: accountId };

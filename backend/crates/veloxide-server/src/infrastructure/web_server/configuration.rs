@@ -2,8 +2,9 @@ use std::net::SocketAddr;
 
 use serde::{Deserialize, Serialize};
 
-pub const DEFAULT_REDIRECT_PATH: &str = "/swagger-ui";
+pub const FRONTEND_CLIENT_ORIGIN_ENV_VAR: &str = "FRONTEND_CLIENT_ORIGIN";
 pub const HTTP_PORT_ENV_VAR: &str = "HTTP_PORT";
+pub const DEFAULT_REDIRECT_PATH: &str = "/swagger-ui";
 pub const HTTP_PORT_DEFAULT: &str = "8080";
 
 #[derive(Serialize, Deserialize, Clone)]

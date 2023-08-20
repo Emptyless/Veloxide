@@ -13,11 +13,11 @@ use oauth2::{
     basic::BasicClient, reqwest::async_http_client, AuthorizationCode, CsrfToken,
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse,
 };
+use serde::Deserialize;
+use utoipa::IntoParams;
 
 use crate::infrastructure::{middleware::*, web_server::oauth::google::*};
 use tower_cookies::Cookies;
-
-pub const AUTH_TOKEN_COOKIE_NAME: &str = "auth-token";
 
 use crate::{
     domain::{
@@ -43,18 +43,60 @@ pub async fn protected() -> Result<&'static str, AuthError> {
     Ok("protected")
 }
 
+use url::Url;
+
+#[derive(Deserialize, Debug, IntoParams)]
+pub struct LoginQuery {
+    pub return_url: Option<String>,
+}
+pub const ALLOWED_REDIRECT_PATHS: &[&str] = &["/", "/login", "/login/", "/profile/", "/profile"];
+pub const ALLOWED_REDIRECT_HOSTS: &[&str] = &[
+    "localhost",
+    "beta.examplebanking.veloxide.dev",
+    "examplebanking.veloxide.dev",
+];
+impl LoginQuery {
+    #[tracing::instrument(ret)]
+    pub fn is_valid_return_url(&self) -> bool {
+        if let Some(return_url) = &self.return_url {
+            if let Ok(parsed_url) = Url::parse(return_url) {
+                if parsed_url.scheme() != "http" && parsed_url.scheme() != "https" {
+                    tracing::info!("invalid scheme: {}", parsed_url.scheme());
+                    return false;
+                }
+
+                if !ALLOWED_REDIRECT_HOSTS.contains(&parsed_url.host_str().unwrap_or("")) {
+                    tracing::info!("invalid host: {}", parsed_url.host_str().unwrap_or("none"));
+                    return false;
+                }
+
+                if !ALLOWED_REDIRECT_PATHS.contains(&parsed_url.path()) {
+                    tracing::info!("invalid path: {}", parsed_url.path());
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        false
+    }
+}
+
 #[utoipa::path(
     get,
     tag = "Auth",
     path = "/login",
+    params(
+        LoginQuery,
+    ),
     responses(
+        (status = 400, description = "Invalid return URL provided"),
         (status = 302, description = "Redirect to Google's login page")
     )
   )]
-#[tracing::instrument(ret, err)]
+#[tracing::instrument(ret, skip(oauth_client, oauth2_state_repo), err)]
 pub async fn login(
-    cookies: Cookies,
-    Query(mut params): Query<HashMap<String, String>>,
+    Query(params): Query<LoginQuery>,
     Extension(user_data): Extension<Option<UserData>>,
     Extension(oauth_client): Extension<BasicClient>,
     Extension(mut oauth2_state_repo): Extension<OAuth2StateRepositoryImpl>,
@@ -63,9 +105,12 @@ pub async fn login(
         return Ok(Redirect::temporary(DEFAULT_REDIRECT_PATH));
     }
 
-    let return_url = params
-        .remove("return_url")
-        .unwrap_or_else(|| DEFAULT_REDIRECT_PATH.to_string());
+    let return_url = match params.is_valid_return_url() {
+        true => params
+            .return_url
+            .unwrap_or_else(|| DEFAULT_REDIRECT_PATH.to_string()),
+        false => DEFAULT_REDIRECT_PATH.to_string(),
+    };
 
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -94,7 +139,7 @@ pub async fn google_oauth_callback_handler(
     Query(mut params): Query<HashMap<String, String>>,
     cookies: Cookies,
     Extension(mut oauth2_state_repo): Extension<OAuth2StateRepositoryImpl>,
-    Extension(mut user_repo): Extension<UserRepositoryImpl>,
+    Extension(user_repo): Extension<UserRepositoryImpl>,
     Extension(oauth_client): Extension<BasicClient>,
 ) -> crate::prelude::Result<impl IntoResponse> {
     let query_csrf_state = CsrfToken::new(params.remove("state").wrap_err("OAuth: without state")?);
@@ -157,7 +202,6 @@ pub async fn google_oauth_callback_handler(
             user
         }
     };
-
     let key = &auth_config().token_key;
     let auth_token: AuthToken = new_web_token(
         &user.email,
@@ -183,13 +227,19 @@ pub async fn google_oauth_callback_handler(
   )]
 #[tracing::instrument(ret, err)]
 pub async fn logout(cookies: Cookies) -> Result<impl IntoResponse, AuthError> {
-    let _auth_token = cookies
-        .get(AUTH_TOKEN_COOKIE_NAME)
-        .ok_or(AuthError::AuthTokenNotFound)?
-        .value()
-        .to_owned();
-
     remove_auth_token_cookie(&cookies);
-
     Ok(Redirect::to(DEFAULT_REDIRECT_PATH))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_return_urls() {
+        let query = LoginQuery {
+            return_url: Some("/".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
 }

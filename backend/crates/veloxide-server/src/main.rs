@@ -3,6 +3,9 @@
 #![warn(clippy::all)]
 #![cfg_attr(coverage_nightly, feature(no_coverage))]
 
+use std::sync::Arc;
+
+use crate::application::auth_service::AuthServiceImpl;
 use crate::application::bank_account_application_service::BankAccountServiceImpl;
 use crate::infrastructure::grpc::bank_account_grpc_service::GRpcBankAccountService;
 use crate::infrastructure::{
@@ -11,20 +14,20 @@ use crate::infrastructure::{
 };
 use crate::interfaces::hello::hello_world::greeter_server::GreeterServer;
 use crate::interfaces::hello::MyGreeter;
+use auth_grpc_service::authentication_server::AuthenticationServer;
 use axum::{
     routing::{get, post},
     Extension, Router, Server,
 };
 use axum_prometheus::PrometheusMetricLayer;
 use axum_tonic::{NestTonic, RestGrpcService};
-use hyper::Method;
+use infrastructure::grpc::auth_grpc_service;
 use infrastructure::middleware::auth;
 use infrastructure::web_server::graphql::new_graphql_router;
 use infrastructure::{logging, observability};
 use infrastructure::{repositories, web_server, web_server::openapi::ApiDoc};
 use tower::ServiceBuilder;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -56,11 +59,7 @@ async fn main() -> crate::prelude::Result<()> {
 
     let pool = infrastructure::get_db_connection().await?;
 
-    // In a production app this should be as locked down as possible
-    let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST])
-        .allow_headers(Any)
-        .allow_origin(Any);
+    let cors_layer = infrastructure::web_server::new_cors_layer();
 
     // Bank account init
     let (bank_account_cqrs, bank_account_view_repository) =
@@ -125,11 +124,14 @@ async fn main() -> crate::prelude::Result<()> {
         .layer(Extension(oauth2_state_repository))
         .layer(Extension(user_data))
         .layer(prometheus_layer)
-        .layer(cors.clone())
+        .layer(cors_layer.clone())
         .layer(CookieManagerLayer::new())
         .route("/health", get(|| async move { "HEALTHY" }));
 
     let web_server_config = WebServerConfiguration::from_env();
+    let auth_application_service = AuthServiceImpl::new(Arc::new(user_repository));
+    let auth_grpc_service =
+        auth_grpc_service::GRpcAuthService::new(Box::new(auth_application_service));
     let bank_account_application_service =
         BankAccountServiceImpl::new(bank_account_view_repository.clone());
     let bank_account_service =
@@ -137,10 +139,12 @@ async fn main() -> crate::prelude::Result<()> {
     let bank_account_service_server = BankAccountServiceServer::new(bank_account_service);
     let grpc_web_bank_account_service = tonic_web::enable(bank_account_service_server);
     let tonic_greeter_service = tonic_web::enable(GreeterServer::new(MyGreeter::default()));
+    let auth_server = tonic_web::enable(AuthenticationServer::new(auth_grpc_service));
     let grpc_router = Router::new()
         .nest_tonic(tonic_greeter_service)
         .nest_tonic(grpc_web_bank_account_service)
-        .layer(cors);
+        .nest_tonic(auth_server)
+        .layer(cors_layer);
     let multiplexed_service = RestGrpcService::new(axum_router, grpc_router);
     Ok(Server::bind(&web_server_config.get_address())
         .serve(multiplexed_service.into_make_service())

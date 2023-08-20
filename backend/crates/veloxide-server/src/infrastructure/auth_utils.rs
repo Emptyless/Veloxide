@@ -5,7 +5,7 @@ use tower_cookies::{Cookie, Cookies};
 
 use crate::infrastructure::{cryptography::*, middleware::error::AuthError};
 
-pub const AUTH_TOKEN_COOKIE_NAME: &str = "auth-token";
+pub const AUTH_TOKEN_COOKIE_NAME: &str = "veloxide_auth_token";
 
 pub fn get_auth_token(cookies: &Cookies) -> Result<AuthToken, AuthError> {
     let auth_token = cookies

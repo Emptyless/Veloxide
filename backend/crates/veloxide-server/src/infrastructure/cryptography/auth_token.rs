@@ -92,14 +92,13 @@ pub enum TokenValidationError {
 
 impl IntoResponse for TokenValidationError {
     fn into_response(self) -> Response {
-        let body = self.to_string();
         let status = match self {
             TokenValidationError::InvalidTokenFormat
             | TokenValidationError::FailedToDecodeTokenIdentifier
             | TokenValidationError::FailedToDecodeTokenExpiration
             | TokenValidationError::FailedToParseTokenExpiration => StatusCode::BAD_REQUEST,
         };
-        (status, body).into_response()
+        (status, self.to_string()).into_response()
     }
 }
 
