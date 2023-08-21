@@ -236,10 +236,82 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_valid_return_urls() {
+    fn test_valid_return_url_localhost() {
         let query = LoginQuery {
-            return_url: Some("/".to_string()),
+            return_url: Some("http://localhost:5173".to_string()),
         };
         assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_localhost_login() {
+        let query = LoginQuery {
+            return_url: Some("http://localhost:5173/login".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_localhost_profile() {
+        let query = LoginQuery {
+            return_url: Some("http://localhost:5173/profile".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_beta() {
+        let query = LoginQuery {
+            return_url: Some("https://beta.examplebanking.veloxide.dev".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_beta_login() {
+        let query = LoginQuery {
+            return_url: Some("http://beta.examplebanking.veloxide.dev/login".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_beta_profile() {
+        let query = LoginQuery {
+            return_url: Some("http://beta.examplebanking.veloxide.dev/profile".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_examplebanking() {
+        let query = LoginQuery {
+            return_url: Some("https://examplebanking.veloxide.dev".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_examplebanking_login() {
+        let query = LoginQuery {
+            return_url: Some("https://examplebanking.veloxide.dev/login".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_valid_return_url_examplebanking_profile() {
+        let query = LoginQuery {
+            return_url: Some("https://examplebanking.veloxide.dev/profile".to_string()),
+        };
+        assert!(query.is_valid_return_url());
+    }
+
+    #[test]
+    fn test_invalid_return_url_otherdomain_fails() {
+        let query = LoginQuery {
+            return_url: Some("https://otherdomain.com/profile".to_string()),
+        };
+        assert!(!query.is_valid_return_url());
     }
 }

@@ -61,7 +61,7 @@ mod tests {
         let load_result = dotenvy::from_filename_override(ENV_EXAMPLE_FILEPATH);
         assert!(load_result.is_ok());
 
-        let db_connection_url = get_database_environment_variable().await;
+        let db_connection_url = get_database_environment_variable();
         assert_eq!(
             db_connection_url,
             "postgresql://postgres:thisisnotsecure@localhost:5432/veloxidedb"

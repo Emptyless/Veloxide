@@ -22,6 +22,9 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 				image: userResponse.image
 			};
 			user.set(userView);
+		} else {
+			cookies.delete(AUTH_TOKEN_COOKIE_NAME);
+			userView = undefined;
 		}
 	}
 	return { authToken: authToken, user: userView };

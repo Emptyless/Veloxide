@@ -18,7 +18,10 @@ OBSERVABILITY_SERVICE_NAME = "veloxide-server-fly"
 HTTP_PORT = "8080"
 AUTHZ_ENABLED = "false"
 GRAPHQL_ENABLED = "false"
-GOOGLE_REDIRECT_URL = "https://veloxide-demo-api.fly.dev/auth/google/callback"
+GOOGLE_REDIRECT_URL = "https://api.examplebanking.veloxide.dev/auth/google/callback"
+FRONTEND_CLIENT_ORIGIN = "https://beta.examplebanking.veloxide.dev"
+AUTH_TOKEN_COOKIE_DOMAIN = ".examplebanking.veloxide.dev"
+HTTPS = "true"
 
 [[services]]
 protocol = "tcp"

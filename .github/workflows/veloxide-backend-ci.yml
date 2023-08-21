@@ -16,7 +16,25 @@ on:
       - "**.md"
 
 jobs:
+  pre_job:
+    name: Determine whether to skip
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          concurrent_skipping: "never"
+          skip_after_successful_duplicate: "true"
+          paths_ignore: '["**/README.md", "**/docs/**"]'
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+
   security_audit:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     name: Dependency audit
     steps:
@@ -27,6 +45,8 @@ jobs:
         continue-on-error: true
 
   coverage:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Code Coverage Report
     runs-on: ubuntu-latest
     env:
@@ -67,6 +87,8 @@ jobs:
           fail_ci_if_error: false
 
   check:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Cargo Check
     runs-on: ubuntu-latest
     env:
@@ -94,6 +116,8 @@ jobs:
           command: check
 
   test-policies:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Test Policies
     runs-on: ubuntu-latest
     steps:
@@ -109,6 +133,8 @@ jobs:
         run: opa test policies/*.rego -v
 
   test:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     name: Test
     runs-on: ubuntu-latest
     env:
