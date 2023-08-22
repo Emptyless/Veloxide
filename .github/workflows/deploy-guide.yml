@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy_guide:
     name: Deploy Guide
     runs-on: ubuntu-latest
     permissions:

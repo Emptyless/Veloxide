@@ -1,8 +1,9 @@
 <script lang="ts">
 	import User from '~icons/fe/user';
 	import { browser } from '$app/environment';
-	import { popup } from '@skeletonlabs/skeleton';
+	import { popup, Avatar } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { isValidURL } from '$lib/utils';
 	const popupFeatured: PopupSettings = {
 		event: 'click',
 		target: 'popupFeatured',
@@ -10,8 +11,8 @@
 	};
 	import { getContext } from 'svelte';
 	import { AUTH_SERVICE_LOGOUT_URL, AUTH_SERVICE_LOGIN_URL } from '$lib/consts';
-	const user = getContext('user');
-
+	import type { UserView } from '$lib/stubs/auth';
+	const user: any | UserView = getContext('user');
 	let returnUrl: string;
 	let loginUrl: string;
 	$: if (browser) {
@@ -24,7 +25,7 @@
 				method: 'POST',
 				credentials: 'include'
 			});
-			user.set(null);
+			user.set(undefined);
 		} catch (error) {
 			console.error(error);
 		}
@@ -33,7 +34,11 @@
 
 {#if $user && typeof $user !== 'undefined'}
 	<button id="profile" aria-label="profile" class="btn-icon btn-icon-sm" use:popup={popupFeatured}>
-		<User style="font-size: 1.5em" />
+		{#if $user.picture && isValidURL($user.picture)}
+			<Avatar src={$user.picture} class="w-full h-full" />
+		{:else}
+			<User style="font-size: 1.5em" />
+		{/if}
 	</button>
 	<div class="card p-4 w-72 shadow-xl" data-popup="popupFeatured">
 		<div class="space-y-4">
@@ -42,7 +47,11 @@
 					class="avatar flex aspect-square text-surface-50 font-semibold justify-center items-center overflow-hidden isolate bg-surface-400-500-token w-16 rounded-full"
 					data-testid="avatar"
 				>
-					<User class="avatar-image w-full h-full object-cover" />
+					{#if $user.picture && isValidURL($user.picture)}
+						<Avatar src={$user.picture} class="w-full h-full" />
+					{:else}
+						<User class="avatar-image w-full h-full object-cover" />
+					{/if}
 				</figure>
 			</a>
 			<div>

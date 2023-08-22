@@ -1,21 +1,5 @@
 {
   "db": "PostgreSQL",
-  "534f9f02048d32ef4da083fb4fc6d5f5606dd955e644954d07ff0b1ea94031e9": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "Timestamptz",
-          "Timestamptz",
-          "Uuid"
-        ]
-      }
-    },
-    "query": "INSERT INTO users (id, email, created_at, updated_at, token_salt) VALUES ($1, $2, $3, $4, $5)"
-  },
   "606b4d715b40f7221272dd8a82d99b0c87901171c715f3a8404bd457e5db6ee5": {
     "describe": {
       "columns": [
@@ -87,9 +71,45 @@
           "name": "token_salt",
           "ordinal": 4,
           "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verified_email",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "picture",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 10,
+          "type_info": "Varchar"
         }
       ],
       "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false,
         false,
         false,
@@ -103,6 +123,28 @@
       }
     },
     "query": "SELECT * FROM users WHERE id = $1"
+  },
+  "cfbda6e41da03e16de145d7aa53005b0c865021cab81ea0c7fe76ab39b8285c8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Bool",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Text",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO users (id, email, verified_email, created_at, updated_at, token_salt, given_name, family_name, name, picture, locale) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
   },
   "d97305000808fb3c9e26a028a1193b7a6dbc28e8cc85522e56e20b7ee61f2916": {
     "describe": {
@@ -147,9 +189,45 @@
           "name": "token_salt",
           "ordinal": 4,
           "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verified_email",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "picture",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 10,
+          "type_info": "Varchar"
         }
       ],
       "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false,
         false,
         false,

@@ -38,12 +38,18 @@ impl UserRepository for PostgresUserRepository {
     #[instrument(skip(self), err)]
     async fn create_user(&self, user: &User) -> Result<()> {
         let query = sqlx::query!(
-            "INSERT INTO users (id, email, created_at, updated_at, token_salt) VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO users (id, email, verified_email, created_at, updated_at, token_salt, given_name, family_name, name, picture, locale) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
             Uuid::new_v4(),
             user.email,
+            user.verified_email,
             user.created_at,
             user.updated_at,
-            Uuid::new_v4()
+            Uuid::new_v4(),
+            user.given_name,
+            user.family_name,
+            user.name,
+            user.picture,
+            user.locale,
         );
 
         query.execute(&self.pool).await?;

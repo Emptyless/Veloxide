@@ -50,28 +50,50 @@ services:
     ports:
       - "9090:9090"
 
-  redis:
-    image: redis:latest
-    restart: always
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    ports:
-      - "6379:6379"
-
   opa:
     image: openpolicyagent/opa:latest
     ports:
       - "8181:8181"
     volumes:
       - ./policies:/policies
-    command: ["run", "--server", "--addr=0.0.0.0:8181", "--log-level=debug", "/policies/authz.rego"]
+    command:
+      [
+        "run",
+        "--server",
+        "--addr=0.0.0.0:8181",
+        "--log-level=debug",
+        "/policies/authz.rego",
+      ]
 
-  # Uncomment to use OTEL collector pipeline before Tempo
-  # otel-collector:
-  #   image: otel/opentelemetry-collector:latest
-  #   command: ["--config=/etc/otel-collector.yaml"]
-  #   volumes:
-  #     - ./docker/otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
-  #   ports:
-  #     - 14250:14250 # Jaeger
-  #     - 4317:4317 # OTLP gRPC
+  frontend:
+    build:
+      context: ./frontends/sveltekit/
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      VITE_GRPC_SERVER_BASE_URL: "http://backend:8000"
+    ports:
+      - 5000:3000
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - tempo
+      - opa
+    environment:
+      OBSERVABILITY_SERVICE_NAME: "veloxide-server"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4317"
+      RUST_LOG: "info"
+      DATABASE_URL: "postgresql://postgres:thisisnotsecure@postgres:5432/veloxidedb"
+      HTTP_PORT: "8080"
+      TOKEN_KEY: "${TOKEN_KEY}"
+      TOKEN_DURATION_MINUTES: "1440"
+      POLICY_SERVER_URL: "http://opa:8181/v1/data/httpapi/authz"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: "http://localhost:8080/auth/google/callback"

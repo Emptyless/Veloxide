@@ -15,6 +15,7 @@ use crate::infrastructure::{
 use crate::interfaces::hello::hello_world::greeter_server::GreeterServer;
 use crate::interfaces::hello::MyGreeter;
 use auth_grpc_service::authentication_server::AuthenticationServer;
+use auth_grpc_service::UserView;
 use axum::{
     routing::{get, post},
     Extension, Router, Server,
@@ -84,7 +85,7 @@ async fn main() -> crate::prelude::Result<()> {
     let user_repository = repositories::UserRepositoryImpl::new(pool.clone());
     let oauth2_state_repository = repositories::OAuth2StateRepositoryImpl::new(pool.clone());
     let google_oauth2_client = web_server::oauth::build_google_oauth_client();
-    let user_data: Option<infrastructure::middleware::UserData> = None;
+    let user_data: Option<UserView> = None;
     let auth_routes = Router::new()
         .route("/login", get(web_server::oauth::login))
         .route("/protected", get(web_server::oauth::protected))

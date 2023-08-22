@@ -10,8 +10,11 @@ message UserView {
     string id = 1;
     string name = 2;
     string email = 3;
-    bool email_verified = 4;
-    string image = 5;
+    bool verified_email = 4;
+    string given_name = 5;
+    string family_name = 6;
+    string picture = 7;
+    string locale = 8;
 }
 
 message GetUserResponse {

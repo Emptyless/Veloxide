@@ -5,12 +5,24 @@ default:
     @just --list --justfile {{justfile()}}
 
 # Run the application supporting containers, then run the binary
-dev: fmt up migrate
+run: fmt up migrate
     cargo run -p veloxide-server | bunyan
 
+[private]
+run-backend: run
+
+# Run the application supporting containers, then run the binary
+dev-backend: run
+
+[private]
+dev: run
+
 # Run the application supporting containers, then run the frontend with hot reloading
-dev-frontend: 
+dev-frontend: run
     cd ./frontends/sveltekit && pnpm run dev
+
+[private]
+run-frontend: dev-frontend
 
 # Stop the containers in docker (this stops the docker stack)
 stop:

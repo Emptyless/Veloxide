@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::infrastructure::grpc::auth_grpc_service::UserView;
 use crate::infrastructure::web_server::oauth::handlers::auth::auth_config;
 use crate::infrastructure::{cryptography::*, web_server::configuration::DEFAULT_REDIRECT_PATH};
 use axum::{
@@ -15,6 +16,7 @@ use oauth2::{
 };
 use serde::Deserialize;
 use utoipa::IntoParams;
+use uuid::Uuid;
 
 use crate::infrastructure::{middleware::*, web_server::oauth::google::*};
 use tower_cookies::Cookies;
@@ -97,7 +99,7 @@ impl LoginQuery {
 #[tracing::instrument(ret, skip(oauth_client, oauth2_state_repo), err)]
 pub async fn login(
     Query(params): Query<LoginQuery>,
-    Extension(user_data): Extension<Option<UserData>>,
+    Extension(user_data): Extension<Option<UserView>>,
     Extension(oauth_client): Extension<BasicClient>,
     Extension(mut oauth2_state_repo): Extension<OAuth2StateRepositoryImpl>,
 ) -> Result<Redirect, AuthError> {
@@ -117,6 +119,8 @@ pub async fn login(
     let (auth_url, csrf_token) = oauth_client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("email".to_string()))
+        .add_scope(Scope::new("profile".to_string()))
+        .add_scope(Scope::new("openid".to_string()))
         .set_pkce_challenge(pkce_challenge)
         .url();
 
@@ -134,7 +138,37 @@ pub async fn login(
     Ok(Redirect::temporary(auth_url.as_str()))
 }
 
-#[tracing::instrument(ret, err)]
+#[derive(Deserialize)]
+pub struct GoogleUser {
+    pub id: String,
+    pub email: email_address::EmailAddress,
+    pub verified_email: bool,
+    pub name: String,
+    pub given_name: String,
+    pub family_name: String,
+    pub picture: String,
+    pub locale: String,
+}
+
+impl From<GoogleUser> for User {
+    fn from(google_user: GoogleUser) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            name: google_user.name,
+            email: google_user.email.as_str().to_string(),
+            verified_email: google_user.verified_email,
+            given_name: google_user.given_name,
+            family_name: google_user.family_name,
+            picture: google_user.picture,
+            locale: google_user.locale,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            token_salt: Uuid::new_v4(),
+        }
+    }
+}
+
+#[tracing::instrument()]
 pub async fn google_oauth_callback_handler(
     Query(mut params): Query<HashMap<String, String>>,
     cookies: Cookies,
@@ -154,14 +188,12 @@ pub async fn google_oauth_callback_handler(
     }
 
     let pkce_code_verifier = PkceCodeVerifier::new(oauth2_state.code_verifier.clone());
-
     let token_response = oauth_client
         .exchange_code(code)
         .set_pkce_verifier(pkce_code_verifier)
         .request_async(async_http_client)
         .await
         .map_err(|_| eyre!("OAuth: failed to exchange code"))?;
-
     let access_token = token_response.access_token().secret();
     let user_info_url = GOOGLE_USERINFO_URL.to_owned() + access_token;
 
@@ -172,32 +204,19 @@ pub async fn google_oauth_callback_handler(
         .await
         .map_err(|_| eyre!("OAuth: received invalid userinfo"))?;
 
-    let mut body: serde_json::Value = serde_json::from_str(body.as_str())
+    let google_user: GoogleUser = serde_json::from_str(body.as_str())
         .map_err(|_| eyre!("OAuth: Serde failed to parse userinfo"))?;
 
-    tracing::info!("OAuth: userinfo: {:?}", body);
-
-    let email = body["email"]
-        .take()
-        .as_str()
-        .ok_or(eyre!("OAuth: Serde failed to parse email address"))?
-        .to_owned();
-
-    let verified_email = body["verified_email"]
-        .take()
-        .as_bool()
-        .ok_or(eyre!("OAuth: Serde failed to parse verified_email"))?;
-
-    if !verified_email {
+    if !&google_user.verified_email {
         return Err(AuthError::EmailAddressNotVerified.into());
     }
-
-    let get_user_result = user_repo.get_user_by_email(&email).await;
-
-    let user = match get_user_result {
+    let user = match user_repo
+        .get_user_by_email(google_user.email.as_str())
+        .await
+    {
         Ok(user) => user,
         Err(_) => {
-            let user = User::new(email.clone());
+            let user: User = google_user.into();
             user_repo.create_user(&user).await?;
             user
         }

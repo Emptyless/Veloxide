@@ -29,13 +29,25 @@ export interface UserView {
      */
     email: string;
     /**
-     * @generated from protobuf field: bool email_verified = 4;
+     * @generated from protobuf field: bool verified_email = 4;
      */
-    emailVerified: boolean;
+    verifiedEmail: boolean;
     /**
-     * @generated from protobuf field: string image = 5;
+     * @generated from protobuf field: string given_name = 5;
      */
-    image: string;
+    givenName: string;
+    /**
+     * @generated from protobuf field: string family_name = 6;
+     */
+    familyName: string;
+    /**
+     * @generated from protobuf field: string picture = 7;
+     */
+    picture: string;
+    /**
+     * @generated from protobuf field: string locale = 8;
+     */
+    locale: string;
 }
 /**
  * @generated from protobuf message auth.GetUserResponse
@@ -62,12 +74,15 @@ class UserView$Type extends MessageType<UserView> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "email_verified", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 5, name: "image", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 4, name: "verified_email", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 5, name: "given_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "family_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "picture", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "locale", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<UserView>): UserView {
-        const message = { id: "", name: "", email: "", emailVerified: false, image: "" };
+        const message = { id: "", name: "", email: "", verifiedEmail: false, givenName: "", familyName: "", picture: "", locale: "" };
         globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             reflectionMergePartial<UserView>(this, message, value);
@@ -87,11 +102,20 @@ class UserView$Type extends MessageType<UserView> {
                 case /* string email */ 3:
                     message.email = reader.string();
                     break;
-                case /* bool email_verified */ 4:
-                    message.emailVerified = reader.bool();
+                case /* bool verified_email */ 4:
+                    message.verifiedEmail = reader.bool();
                     break;
-                case /* string image */ 5:
-                    message.image = reader.string();
+                case /* string given_name */ 5:
+                    message.givenName = reader.string();
+                    break;
+                case /* string family_name */ 6:
+                    message.familyName = reader.string();
+                    break;
+                case /* string picture */ 7:
+                    message.picture = reader.string();
+                    break;
+                case /* string locale */ 8:
+                    message.locale = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -114,12 +138,21 @@ class UserView$Type extends MessageType<UserView> {
         /* string email = 3; */
         if (message.email !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.email);
-        /* bool email_verified = 4; */
-        if (message.emailVerified !== false)
-            writer.tag(4, WireType.Varint).bool(message.emailVerified);
-        /* string image = 5; */
-        if (message.image !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.image);
+        /* bool verified_email = 4; */
+        if (message.verifiedEmail !== false)
+            writer.tag(4, WireType.Varint).bool(message.verifiedEmail);
+        /* string given_name = 5; */
+        if (message.givenName !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.givenName);
+        /* string family_name = 6; */
+        if (message.familyName !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.familyName);
+        /* string picture = 7; */
+        if (message.picture !== "")
+            writer.tag(7, WireType.LengthDelimited).string(message.picture);
+        /* string locale = 8; */
+        if (message.locale !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.locale);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

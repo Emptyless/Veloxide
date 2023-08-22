@@ -63,10 +63,13 @@ impl From<User> for UserView {
     fn from(user: User) -> Self {
         UserView {
             id: user.id.to_string(),
-            name: String::from("N/A"),
+            name: user.name,
             email: user.email,
-            email_verified: true,
-            image: String::from("N/A"),
+            verified_email: user.verified_email,
+            given_name: user.given_name,
+            family_name: user.family_name,
+            picture: user.picture,
+            locale: user.locale,
         }
     }
 }

@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	const user = getContext('user');
+	const user: any = getContext('user');
 	import { browser } from '$app/environment';
 	import { AUTH_SERVICE_LOGOUT_URL } from '$lib/consts';
 	onMount(() => {
@@ -13,6 +13,7 @@
 	$: if (browser && typeof $user === 'undefined') {
 		goto('/login');
 	}
+	console.log($user);
 	async function logout() {
 		try {
 			await fetch(AUTH_SERVICE_LOGOUT_URL, {

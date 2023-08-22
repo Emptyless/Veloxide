@@ -10,7 +10,10 @@ use tower_cookies::{Cookie, Cookies};
 use super::*;
 use crate::{
     domain::user_repository::UserRepository,
-    infrastructure::{auth_utils::*, cryptography::*, repositories::UserRepositoryImpl},
+    infrastructure::{
+        auth_utils::*, cryptography::*, grpc::auth_grpc_service::UserView,
+        repositories::UserRepositoryImpl,
+    },
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -107,7 +110,7 @@ pub async fn mw_authenticate<B: std::fmt::Debug>(
 async fn resolve_user_data(
     cookies: &Cookies,
     user_repo: UserRepositoryImpl,
-) -> Result<UserData, AuthError> {
+) -> Result<UserView, AuthError> {
     let token_cookie_value = get_user_token_cookie_value(cookies)?;
 
     let token: AuthToken = token_cookie_value
