@@ -8,17 +8,18 @@ default:
 run: fmt up migrate
     cargo run -p veloxide-server | bunyan
 
-[private]
-run-backend: run
 
 # Run the application supporting containers, then run the binary
 dev-backend: run
 
 [private]
+run-backend: run
+
+[private]
 dev: run
 
 # Run the application supporting containers, then run the frontend with hot reloading
-dev-frontend: run
+dev-frontend: up
     cd ./frontends/sveltekit && pnpm run dev
 
 [private]
@@ -96,7 +97,7 @@ fmt:
 # Start the docker stack
 up:
     cp -r ./contracts ./backend/crates/veloxide-server/contracts
-    docker-compose up -d
+    docker-compose up -d --remove-orphans
     rm -rf ./backend/crates/veloxide-server/contracts
 
 # Restarts the OPA container, useful when you've changed the policy

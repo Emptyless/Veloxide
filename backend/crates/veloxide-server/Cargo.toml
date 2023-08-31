@@ -41,7 +41,7 @@ serde_with_macros = "3.2.0"
 uuid = { version = "~1.4", features = ["v4", "serde"] }
 
 # Persistence
-sqlx = { version = "~0", features = [
+sqlx = { version = "~0.7", features = [
     "runtime-tokio-rustls",
     "sqlite",
     "chrono",
@@ -49,7 +49,6 @@ sqlx = { version = "~0", features = [
     "mysql",
     "json",
     "uuid",
-    "offline",
 ] }
 
 # Observability
@@ -69,7 +68,7 @@ tracing-bunyan-formatter = { version = "~0.3", optional = true }
 log = "~0.4"
 
 # Frontend
-ts-rs = { version = "~6", optional = true }
+ts-rs = { version = "~7.0", optional = true }
 
 # Event sourcing
 cqrs-es = "~0"

@@ -1,5 +1,4 @@
 use auth::authentication_server::Authentication;
-use auth::{GetCurrentUserRequest, GetUserResponse};
 use tonic::{Request, Response, Status};
 use tracing::instrument;
 

@@ -15,7 +15,7 @@
 		</div>
 	</svelte:fragment>
 	<a data-sveltekit-preload-data="hover" href="/">
-		<strong class="text-xl text-center uppercase">Example Banking App</strong>
+		<div class="text-xl font-bold text-center uppercase">Example Banking App</div>
 	</a>
 	<svelte:fragment slot="trail">
 		<LightSwitch />

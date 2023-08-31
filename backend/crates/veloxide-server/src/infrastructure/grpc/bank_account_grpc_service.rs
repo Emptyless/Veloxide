@@ -3,7 +3,6 @@ use crate::interfaces::bank_account::bank_account_views::BankAccountView as Doma
 use bank_account_service::bank_account_service_server::BankAccountService;
 use bank_account_service::AccountTransaction as GrpcAccountTransaction;
 use bank_account_service::BankAccountView as GrpcBankAccountView;
-use bank_account_service::{GetBankAccountRequest, GetBankAccountResponse};
 use tonic::{Request, Response, Status};
 
 pub mod bank_account_service {

@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { popup, Avatar } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { isValidURL } from '$lib/utils';
+	import { URLschema } from '$lib/utils';
 	const popupFeatured: PopupSettings = {
 		event: 'click',
 		target: 'popupFeatured',
@@ -33,13 +33,33 @@
 </script>
 
 {#if $user && typeof $user !== 'undefined'}
-	<button id="profile" aria-label="profile" class="btn-icon btn-icon-sm" use:popup={popupFeatured}>
-		{#if $user.picture && isValidURL($user.picture)}
+	<!-- Button for desktop -->
+	<button
+		id="profile-desktop"
+		aria-label="profile"
+		class="btn-icon btn-icon-sm hidden md:inline-block"
+		use:popup={popupFeatured}
+	>
+		{#if $user.picture && URLschema.safeParse($user.picture).success}
 			<Avatar src={$user.picture} class="w-full h-full" />
 		{:else}
 			<User style="font-size: 1.5em" />
 		{/if}
 	</button>
+	<!-- Button for mobile -->
+	<a
+		href="/profile"
+		id="profile-mobile"
+		aria-label="profile"
+		class="btn-icon btn-icon-sm md:hidden"
+	>
+		{#if $user.picture && URLschema.safeParse($user.picture).success}
+			<Avatar src={$user.picture} class="w-full h-full" />
+		{:else}
+			<User style="font-size: 1.5em" />
+		{/if}
+	</a>
+	<!-- Popup on desktop -->
 	<div class="card p-4 w-72 shadow-xl" data-popup="popupFeatured">
 		<div class="space-y-4">
 			<a href="/profile" aria-label="Profile">
@@ -47,7 +67,7 @@
 					class="avatar flex aspect-square text-surface-50 font-semibold justify-center items-center overflow-hidden isolate bg-surface-400-500-token w-16 rounded-full"
 					data-testid="avatar"
 				>
-					{#if $user.picture && isValidURL($user.picture)}
+					{#if $user.picture && URLschema.safeParse($user.picture).success}
 						<Avatar src={$user.picture} class="w-full h-full" />
 					{:else}
 						<User class="avatar-image w-full h-full object-cover" />

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM oauth2_states WHERE csrf_state = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "csrf_state",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "code_verifier",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "return_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "606b4d715b40f7221272dd8a82d99b0c87901171c715f3a8404bd457e5db6ee5"
+}
