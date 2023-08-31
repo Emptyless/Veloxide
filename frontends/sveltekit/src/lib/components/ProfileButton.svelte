@@ -10,8 +10,13 @@
 		placement: 'bottom'
 	};
 	import { getContext } from 'svelte';
-	import { AUTH_SERVICE_LOGOUT_URL, AUTH_SERVICE_LOGIN_URL } from '$lib/consts';
+	import {
+		AUTH_SERVICE_LOGOUT_URL,
+		AUTH_SERVICE_LOGIN_URL,
+		AUTH_TOKEN_COOKIE_NAME
+	} from '$lib/consts';
 	import type { UserView } from '$lib/stubs/auth';
+	import { goto } from '$app/navigation';
 	const user: any | UserView = getContext('user');
 	let returnUrl: string;
 	let loginUrl: string;
@@ -25,8 +30,12 @@
 				method: 'POST',
 				credentials: 'include'
 			});
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 			user.set(undefined);
+			goto('/');
 		} catch (error) {
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+			user.set(undefined);
 			console.error(error);
 		}
 	}

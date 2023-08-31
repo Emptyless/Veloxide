@@ -7,7 +7,7 @@
 	import { URLschema } from '$lib/utils';
 	const user: any | UserView = getContext('user');
 	import { browser } from '$app/environment';
-	import { AUTH_SERVICE_LOGOUT_URL } from '$lib/consts';
+	import { AUTH_TOKEN_COOKIE_NAME, AUTH_SERVICE_LOGOUT_URL } from '$lib/consts';
 	import { Avatar } from '@skeletonlabs/skeleton';
 
 	onMount(() => {
@@ -26,8 +26,12 @@
 				method: 'POST',
 				credentials: 'include'
 			});
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 			user.set(undefined);
+			goto('/');
 		} catch (error) {
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+			user.set(undefined);
 			console.error(error);
 		}
 	}
