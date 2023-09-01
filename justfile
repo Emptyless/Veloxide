@@ -1,4 +1,7 @@
+#!/usr/bin/env -S just --justfile
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 set dotenv-load := true
+export CARGO_TERM_COLOR := "always"
 
 # Show available commands
 default:
@@ -7,7 +10,6 @@ default:
 # Run the application supporting containers, then run the binary
 run: fmt up migrate
     cargo run -p veloxide-server | bunyan
-
 
 # Run the application supporting containers, then run the binary
 dev-backend: run

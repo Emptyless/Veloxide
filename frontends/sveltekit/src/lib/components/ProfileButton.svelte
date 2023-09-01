@@ -13,7 +13,8 @@
 	import {
 		AUTH_SERVICE_LOGOUT_URL,
 		AUTH_SERVICE_LOGIN_URL,
-		AUTH_TOKEN_COOKIE_NAME
+		AUTH_TOKEN_COOKIE_NAME,
+		AUTH_TOKEN_COOKIE_DOMAIN
 	} from '$lib/consts';
 	import type { UserView } from '$lib/stubs/auth';
 	import { goto } from '$app/navigation';
@@ -31,17 +32,17 @@
 			.charAt(0)
 			.toUpperCase()}`;
 	}
-	async function logout() {
+	async function logout(): Promise<void> {
 		try {
 			await fetch(AUTH_SERVICE_LOGOUT_URL, {
 				method: 'POST',
 				credentials: 'include'
 			});
-			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${AUTH_TOKEN_COOKIE_DOMAIN}`;
 			user.set(undefined);
 			goto('/');
 		} catch (error) {
-			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+			document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${AUTH_TOKEN_COOKIE_DOMAIN}`;
 			user.set(undefined);
 			console.error(error);
 		}

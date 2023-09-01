@@ -9,3 +9,5 @@ const formattedBaseUrl: string = authServiceRestBaseUrl.endsWith('/')
 export const AUTH_SERVICE_LOGOUT_URL: string = `${formattedBaseUrl}/logout`;
 export const AUTH_SERVICE_LOGIN_URL: string = `${formattedBaseUrl}/login`;
 export const AUTH_TOKEN_COOKIE_NAME: string = 'veloxide_auth_token';
+export const AUTH_TOKEN_COOKIE_DOMAIN: string =
+	import.meta.env.VITE_AUTH_TOKEN_COOKIE_DOMAIN || 'veloxide.dev';

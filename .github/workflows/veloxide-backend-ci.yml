@@ -11,9 +11,9 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
+    paths:
+      - "backend/**"
+      - "cargo.toml"
 
 jobs:
   pre_job:
@@ -29,8 +29,19 @@ jobs:
         with:
           concurrent_skipping: "never"
           skip_after_successful_duplicate: "true"
-          paths_ignore: '["**/README.md", "**/docs/**"]'
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+          paths_ignore: '["**/README.md", ".github/**", "justfile"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+          paths_filter: |
+            frontend:
+              paths_ignore:
+                - 'frontends/**/docs/**'
+              paths:
+                - 'frontends/**'
+            backend:
+              paths_ignore:
+                - 'backend/docs/**'
+              paths:
+                - 'backend/**'
 
   security_audit:
     needs: pre_job
@@ -46,7 +57,7 @@ jobs:
 
   coverage:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: needs.pre_job.outputs.should_skip != 'true' || !fromJSON(needs.pre_job.outputs.paths_result).backend.should_skip
     name: Code Coverage Report
     runs-on: ubuntu-latest
     env:
@@ -88,7 +99,7 @@ jobs:
 
   check:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: needs.pre_job.outputs.should_skip != 'true' || !fromJSON(needs.pre_job.outputs.paths_result).backend.should_skip
     name: Cargo Check
     runs-on: ubuntu-latest
     env:
@@ -117,7 +128,6 @@ jobs:
 
   test-policies:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
     name: Test Policies
     runs-on: ubuntu-latest
     steps:
@@ -134,7 +144,7 @@ jobs:
 
   test:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: needs.pre_job.outputs.should_skip != 'true' || !fromJSON(needs.pre_job.outputs.paths_result).backend.should_skip
     name: Test
     runs-on: ubuntu-latest
     env:
