@@ -124,7 +124,8 @@ gen:
  
 # Perform the database migrations
 migrate:
-    cd ./backend/crates/veloxide-server/ && cargo sqlx database create && cargo sqlx migrate run
+    cd ./backend/crates/veloxide-server/ && cargo sqlx database create
+    cd ./backend/crates/veloxide-server/ && cargo sqlx migrate run
 
 # Deploy the backend to fly.io
 deploy:

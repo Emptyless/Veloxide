@@ -55,8 +55,25 @@ pub fn convert_to_offsetdatetime(expiry: chrono::DateTime<Utc>) -> OffsetDateTim
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn remove_auth_token_cookie(cookies: &Cookies) {
-    let cookie = Cookie::named(AUTH_TOKEN_COOKIE_NAME);
-    cookies.remove(cookie);
+    let mut cookie = Cookie::new(AUTH_TOKEN_COOKIE_NAME.to_owned(), "".to_owned());
+    cookie.set_expires(Some(
+        OffsetDateTime::from_unix_timestamp(0)
+            .expect("expected to be able to set epoch offset datetime"),
+    ));
+    cookie.set_same_site(SameSite::None);
+    cookie.set_domain(
+        dotenvy::var(AUTH_TOKEN_COOKIE_DOMAIN_ENV_VAR)
+            .unwrap_or(AUTH_TOKEN_COOKIE_DOMAIN_DEFAULT.to_string()),
+    );
+    cookie.set_http_only(true);
+    cookie.set_secure(
+        dotenvy::var(AUTH_TOKEN_COOKIE_HTTPS_ENV_VAR)
+            .unwrap_or("true".to_string())
+            .parse::<bool>()
+            .expect("expected to be able to parse HTTPS env var"),
+    );
+    cookie.set_path("/");
+    cookies.add(cookie);
 }
 
 pub fn get_user_token_cookie_value(cookies: &Cookies) -> Result<String, AuthError> {
