@@ -24,6 +24,13 @@
 		returnUrl = encodeURIComponent(window.location.href);
 		loginUrl = `${AUTH_SERVICE_LOGIN_URL}?return_url=${returnUrl}`;
 	}
+
+	let initials: string;
+	$: if ($user && typeof $user !== 'undefined') {
+		initials = `${$user.givenName.charAt(0).toUpperCase()}${$user.familyName
+			.charAt(0)
+			.toUpperCase()}`;
+	}
 	async function logout() {
 		try {
 			await fetch(AUTH_SERVICE_LOGOUT_URL, {
@@ -50,7 +57,7 @@
 		use:popup={popupFeatured}
 	>
 		{#if $user.picture && URLschema.safeParse($user.picture).success}
-			<Avatar src={$user.picture} class="w-full h-full" />
+			<Avatar src={$user.picture} class="w-full h-full" {initials} />
 		{:else}
 			<User style="font-size: 1.5em" />
 		{/if}
@@ -63,7 +70,7 @@
 		class="btn-icon btn-icon-sm md:hidden"
 	>
 		{#if $user.picture && URLschema.safeParse($user.picture).success}
-			<Avatar src={$user.picture} class="w-full h-full" />
+			<Avatar src={$user.picture} class="w-full h-full" {initials} />
 		{:else}
 			<User style="font-size: 1.5em" />
 		{/if}

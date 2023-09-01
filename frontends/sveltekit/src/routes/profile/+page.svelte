@@ -15,9 +15,16 @@
 			goto('/login');
 		}
 	});
-
+	$: console.log($user);
 	$: if (browser && typeof $user === 'undefined') {
 		goto('/login');
+	}
+
+	let initials: string;
+	$: if ($user && typeof $user !== 'undefined') {
+		initials = `${$user.givenName.charAt(0).toUpperCase()}${$user.familyName
+			.charAt(0)
+			.toUpperCase()}`;
 	}
 
 	async function logout() {
@@ -44,7 +51,7 @@
 
 			<div class="w-24 h-24 mb-4 rounded-full overflow-hidden mx-auto">
 				{#if $user.picture && URLschema.safeParse($user.picture).success}
-					<Avatar src={$user.picture} class="w-full h-full object-cover" />
+					<Avatar src={$user.picture} class="w-full h-full object-cover" {initials} />
 				{:else}
 					<User />
 				{/if}
