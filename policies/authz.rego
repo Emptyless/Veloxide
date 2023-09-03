@@ -19,12 +19,22 @@ is_graphql_playground {
 
 is_login_route {
     is_get_method
-    input.path == ["login"]
+    input.path == ["login", "google"]
+}
+
+is_login_route {
+    is_get_method
+    input.path == ["login", "azure"]
 }
 
 is_logout_route {
     is_post_method
-    input.path == ["logout"]
+    input.path == ["logout", "google"]
+}
+
+is_logout_route {
+    is_post_method
+    input.path == ["logout", "azure"]
 }
 
 is_protected_route {
@@ -45,6 +55,11 @@ is_valid_user(user) {
 is_callback_path {
     is_get_method
     input.path == ["auth", "google", "callback"]
+}
+
+is_callback_path {
+    is_get_method
+    input.path == ["auth", "azure", "callback"]
 }
 
 is_root_path {

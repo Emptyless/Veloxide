@@ -34,6 +34,8 @@ use utoipa_swagger_ui::SwaggerUi;
 
 mod error;
 use dotenvy::dotenv;
+use crate::infrastructure::web_server::oauth::{AZURE_OAUTH_ENABLED_ENV_VAR, GOOGLE_OAUTH_ENABLED_ENV_VAR};
+
 mod application;
 mod domain;
 mod infrastructure;
@@ -84,25 +86,51 @@ async fn main() -> crate::prelude::Result<()> {
     let auth_config = infrastructure::middleware::auth::AuthConfiguration::from_env();
     let user_repository = repositories::UserRepositoryImpl::new(pool.clone());
     let oauth2_state_repository = repositories::OAuth2StateRepositoryImpl::new(pool.clone());
-    let google_oauth2_client = web_server::oauth::build_google_oauth_client();
     let user_data: Option<UserView> = None;
-    let auth_routes = Router::new()
-        .route("/login", get(web_server::oauth::login))
-        .route("/protected", get(web_server::oauth::protected))
-        .route("/logout", post(web_server::oauth::logout))
-        .route(
-            "/auth/google/callback",
-            get(web_server::oauth::google_oauth_callback_handler),
-        );
+
     let api_routes = Router::new().nest("/bank-accounts", bank_account_routes);
-
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
-
     let mut axum_router = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
         .nest("/api", api_routes)
-        .merge(auth_routes)
         .route("/metrics", get(|| async move { metric_handle.render() }));
+
+    let use_google = dotenvy::var(GOOGLE_OAUTH_ENABLED_ENV_VAR)
+        .unwrap_or("false".to_string())
+        .parse::<bool>()
+        .expect("expected to be able to parse GOOGLE_OAUTH_ENABLED env var");
+    if use_google {
+        let google_oauth2_client = web_server::oauth::build_google_oauth_client();
+        let google_auth_routes = Router::new()
+            .route("/login/google", get(web_server::oauth::login))
+            .route("/logout/google", post(web_server::oauth::logout))
+            .route(
+                "/auth/google/callback",
+                get(web_server::oauth::google_oauth_callback_handler),
+            )
+            .layer(Extension(google_oauth2_client));
+        axum_router = axum_router.merge(google_auth_routes)
+    }
+
+    let use_azure = dotenvy::var(AZURE_OAUTH_ENABLED_ENV_VAR)
+        .unwrap_or("false".to_string())
+        .parse::<bool>()
+        .expect("expected to be able to parse AZURE_OAUTH_ENABLED env var");
+    if use_azure {
+        let microsoft_oauth2_client = web_server::oauth::build_azure_oauth_client();
+        let microsoft_auth_routes: Router = Router::new()
+            .route("/login/azure", get(web_server::oauth::login))
+            .route("/logout/azure", post(web_server::oauth::logout))
+            .route(
+                "/auth/azure/callback",
+                get(web_server::oauth::azure_oauth_callback_handler),
+            )
+            .layer(Extension(microsoft_oauth2_client));
+        axum_router = axum_router.merge(microsoft_auth_routes);
+    }
+
+    let auth_routes: Router = Router::new().route("/protected", get(web_server::oauth::protected));
+    axum_router = axum_router.merge(auth_routes);
 
     if graphql_enabled {
         axum_router = axum_router.nest(
@@ -120,7 +148,6 @@ async fn main() -> crate::prelude::Result<()> {
             auth::mw_authorise,
         ))
         .layer(axum::middleware::from_fn(auth::mw_authenticate))
-        .layer(Extension(google_oauth2_client))
         .layer(Extension(user_repository.clone()))
         .layer(Extension(oauth2_state_repository))
         .layer(Extension(user_data))

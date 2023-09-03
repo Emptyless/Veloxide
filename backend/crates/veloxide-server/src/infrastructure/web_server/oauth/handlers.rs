@@ -168,6 +168,101 @@ impl From<GoogleUser> for User {
     }
 }
 
+#[derive(Deserialize)]
+pub struct AzureUser {
+    pub sub: String,
+    pub email: email_address::EmailAddress,
+    pub name: String,
+    pub given_name: String,
+    pub family_name: String,
+    pub picture: String,
+}
+
+impl From<AzureUser> for User {
+    fn from(azure_user: AzureUser) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            name: azure_user.name,
+            email: azure_user.email.as_str().to_string(),
+            verified_email: true,
+            given_name: azure_user.given_name,
+            family_name: azure_user.family_name,
+            picture: azure_user.picture,
+            locale: "".to_string(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            token_salt: Uuid::new_v4(),
+        }
+    }
+}
+
+#[tracing::instrument()]
+pub async fn azure_oauth_callback_handler(
+    Query(mut params): Query<HashMap<String, String>>,
+    cookies: Cookies,
+    Extension(mut oauth2_state_repo): Extension<OAuth2StateRepositoryImpl>,
+    Extension(user_repo): Extension<UserRepositoryImpl>,
+    Extension(oauth_client): Extension<BasicClient>,
+) -> crate::prelude::Result<impl IntoResponse> {
+    let query_csrf_state = CsrfToken::new(params.remove("state").wrap_err("OAuth: without state")?);
+    let code = AuthorizationCode::new(params.remove("code").ok_or(AuthError::WithoutCode)?);
+
+    let oauth2_state: OAuth2State = oauth2_state_repo
+        .get_state(query_csrf_state.secret().as_str())
+        .await?;
+    let crsf_state_equal = oauth2_state.csrf_state == *query_csrf_state.secret();
+    if !crsf_state_equal {
+        return Err(AuthError::CsrfStateMismatch.into());
+    }
+
+    let pkce_code_verifier = PkceCodeVerifier::new(oauth2_state.code_verifier.clone());
+    let token_response = oauth_client
+        .exchange_code(code)
+        .set_pkce_verifier(pkce_code_verifier)
+        .request_async(async_http_client)
+        .await
+        .map_err(|_| eyre!("OAuth: failed to exchange code"))?;
+    let access_token = token_response.access_token().secret();
+    let user_info_url = "https://graph.microsoft.com/oidc/userinfo";
+    let client = reqwest::Client::new();
+    let body = client.get(user_info_url)
+        .header("Authorization", format!("Bearer {}", access_token))
+        .send()
+        .await
+        .map_err(|_| eyre!("OAuth: failed to query userinfo"))?
+        .text()
+        .await
+        .map_err(|_| eyre!("OAuth: received invalid userinfo"))?;
+
+    let azure_user: AzureUser = serde_json::from_str(body.as_str())
+        .map_err(|_| eyre!("OAuth: Serde failed to parse userinfo"))?;
+
+    let user = match user_repo
+        .get_user_by_email(azure_user.email.as_str())
+        .await
+    {
+        Ok(user) => user,
+        Err(_) => {
+            let user: User = azure_user.into();
+            user_repo.create_user(&user).await?;
+            user
+        }
+    };
+    let key = &auth_config().token_key;
+    let auth_token: AuthToken = new_web_token(
+        &user.email,
+        Utc::now() + chrono::Duration::days(1),
+        &user.token_salt.to_string(),
+        key,
+    )?;
+    set_auth_cookie(
+        &cookies,
+        &auth_token.to_string(),
+        Some(auth_token.expiration),
+    );
+    Ok(Redirect::to(oauth2_state.return_url.as_str()))
+}
+
 #[tracing::instrument()]
 pub async fn google_oauth_callback_handler(
     Query(mut params): Query<HashMap<String, String>>,
