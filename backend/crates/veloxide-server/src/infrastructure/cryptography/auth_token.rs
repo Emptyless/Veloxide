@@ -4,6 +4,8 @@ use std::str::FromStr;
 use axum::response::{IntoResponse, Response};
 use chrono::Utc;
 use hyper::StatusCode;
+use serde::{Deserialize, Serialize};
+use serde_with_macros::serde_as;
 
 use super::encoding::*;
 use crate::infrastructure::cryptography::error::*;
@@ -14,6 +16,28 @@ pub struct AuthToken {
     pub identifier: String, // Username or email for example
     pub expiration: chrono::DateTime<Utc>,
     pub signature: String, // b64 encoded signature, usually a UUID
+}
+
+impl AuthToken {
+    #[tracing::instrument(level = "info", skip(salt, key), err)]
+    pub fn new(
+        identifier: &str,
+        expiration: chrono::DateTime<Utc>,
+        salt: &str,
+        key: &str,
+    ) -> Result<Self, CryptograhyError> {
+        let signature = token_sign_into_base64url(
+            identifier,
+            expiration.to_rfc3339().as_str(),
+            salt,
+            key.as_bytes(),
+        )?;
+        Ok(Self {
+            identifier: identifier.to_owned(),
+            expiration,
+            signature,
+        })
+    }
 }
 
 impl FromStr for AuthToken {
@@ -53,28 +77,6 @@ impl Display for AuthToken {
     }
 }
 
-//TODO: Convert this func into a constructor with the new method
-/// Create a new web token
-/// the identifier is usually the username or email address
-pub fn new_web_token(
-    identifier: &str,
-    expiration: chrono::DateTime<Utc>,
-    salt: &str,
-    key: &str,
-) -> Result<AuthToken, CryptograhyError> {
-    let signature = token_sign_into_base64url(
-        identifier,
-        expiration.to_rfc3339().as_str(),
-        salt,
-        key.as_bytes(),
-    )?;
-    Ok(AuthToken {
-        identifier: identifier.to_owned(),
-        expiration,
-        signature,
-    })
-}
-
 #[derive(thiserror::Error, Debug)]
 pub enum TokenValidationError {
     #[error("invalid token format")]
@@ -99,6 +101,44 @@ impl IntoResponse for TokenValidationError {
             | TokenValidationError::FailedToParseTokenExpiration => StatusCode::BAD_REQUEST,
         };
         (status, self.to_string()).into_response()
+    }
+}
+
+#[serde_with::serde_as]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct AuthTokenConfiguration {
+    pub token_key: String,
+    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
+    pub token_duration_minutes: chrono::Duration,
+    pub cookie_domain: String,
+    pub cookie_name: String,
+    pub cookie_secure: bool,
+}
+
+impl AuthTokenConfiguration {
+    pub fn from_env() -> AuthTokenConfiguration {
+        let token_key = dotenvy::var("TOKEN_KEY").expect("TOKEN_KEY must be set");
+        let token_duration_minutes: i64 = dotenvy::var("TOKEN_DURATION_MINUTES")
+            .unwrap_or("480".to_string())
+            .parse()
+            .expect("TOKEN_DURATION_MINUTES must be a valid integer");
+
+        let token_duration = chrono::Duration::minutes(token_duration_minutes);
+        let cookie_domain =
+            dotenvy::var("AUTH_TOKEN_COOKIE_DOMAIN").expect("AUTH_TOKEN_COOKIE_DOMAIN must be set");
+        let cookie_name =
+            dotenvy::var("AUTH_TOKEN_COOKIE_NAME").expect("AUTH_TOKEN_COOKIE_NAME must be set");
+        let cookie_secure = dotenvy::var("HTTPS")
+            .unwrap_or("true".to_string())
+            .parse::<bool>()
+            .expect("expected to be able to parse HTTPS env var");
+        Self {
+            token_key,
+            token_duration_minutes: token_duration,
+            cookie_domain,
+            cookie_name,
+            cookie_secure,
+        }
     }
 }
 

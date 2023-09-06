@@ -5,7 +5,7 @@ use axum::{
     Extension,
 };
 
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::Cookies;
 
 use super::*;
 use crate::{
@@ -17,17 +17,15 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serde_with_macros::serde_as;
 use std::sync::OnceLock;
 
-#[serde_with::serde_as]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct AuthConfiguration {
-    pub token_key: String,
-    #[serde_as(as = "serde_with::DurationSeconds<i64>")]
-    pub token_duration_minutes: chrono::Duration,
     pub policy_server_url: String,
     pub authz_enabled: bool,
+    pub auth_token_configuration: AuthTokenConfiguration,
+    pub google_oauth_enabled: bool,
+    pub microsoft_oauth_enabled: bool,
 }
 
 pub fn auth_config() -> &'static AuthConfiguration {
@@ -37,28 +35,30 @@ pub fn auth_config() -> &'static AuthConfiguration {
 
 impl AuthConfiguration {
     pub fn from_env() -> AuthConfiguration {
-        let token_key = dotenvy::var("TOKEN_KEY").expect("TOKEN_KEY must be set");
-        let token_duration_minutes: i64 = dotenvy::var("TOKEN_DURATION_MINUTES")
-            .unwrap_or("480".to_string())
-            .parse()
-            .expect("TOKEN_DURATION_MINUTES must be a valid integer");
-
-        let token_duration = chrono::Duration::minutes(token_duration_minutes);
         let authz_enabled = dotenvy::var("AUTHZ_ENABLED")
             .unwrap_or("true".to_string())
             .parse()
-            .expect("Expected boolean value for AUTHZ_ENABLED");
-
+            .expect("expected to be able to parse AUTHZ_ENABLED env var to a boolean");
         let policy_server_url = match authz_enabled {
             true => dotenvy::var("POLICY_SERVER_URL").expect("POLICY_SERVER_URL must be set"),
             false => String::new(),
         };
+        let auth_token_configuration = AuthTokenConfiguration::from_env();
+        let google_oauth_enabled = dotenvy::var("GOOGLE_OAUTH_ENABLED")
+            .unwrap_or("false".to_string())
+            .parse::<bool>()
+            .expect("expected to be able to parse GOOGLE_OAUTH_ENABLED env var to a boolean");
+        let microsoft_oauth_enabled = dotenvy::var("MICROSOFT_OAUTH_ENABLED")
+            .unwrap_or("false".to_string())
+            .parse::<bool>()
+            .expect("expected to be able to parse MICROSOFT_OAUTH_ENABLED env var to a boolean");
 
         AuthConfiguration {
-            token_key,
-            token_duration_minutes: token_duration,
             policy_server_url,
             authz_enabled,
+            auth_token_configuration,
+            google_oauth_enabled,
+            microsoft_oauth_enabled,
         }
     }
 }
@@ -97,7 +97,7 @@ pub async fn mw_authenticate<B: std::fmt::Debug>(
 
     if user_data_result.is_err() && !matches!(user_data_result, Err(AuthError::AuthTokenNotFound)) {
         tracing::info!("removing invalid token");
-        cookies.remove(Cookie::named(AUTH_TOKEN_COOKIE_NAME))
+        remove_auth_token_cookie(&cookies);
     }
 
     if user_data_result.is_ok() {
@@ -125,7 +125,12 @@ async fn resolve_user_data(
     validate_web_token(&token, &user.token_salt.to_string())
         .map_err(|_| AuthError::TokenValidationFailed)?;
 
-    let new_expiration = Some(token.expiration + (auth_config().token_duration_minutes));
+    let new_expiration = Some(
+        token.expiration
+            + (auth_config()
+                .auth_token_configuration
+                .token_duration_minutes),
+    );
     set_auth_cookie(cookies, &token.to_string(), new_expiration);
 
     Ok(user.into())
@@ -133,7 +138,7 @@ async fn resolve_user_data(
 
 #[tracing::instrument(ret, err, level = "debug", skip(token, token_salt))]
 fn validate_web_token(token: &AuthToken, token_salt: &str) -> crate::prelude::Result<()> {
-    let key = &auth_config().token_key.as_bytes();
+    let key = &auth_config().auth_token_configuration.token_key.as_bytes();
     validate_token_signature_and_expiry(token, token_salt, key)?;
     Ok(())
 }

@@ -12,10 +12,6 @@ test_is_graphql_playground {
     is_graphql_playground with input as {"method": "POST", "path": [""], "headers": {"content-type": "application/json", "referer": "http://localhost:8080/graphql"}}
 }
 
-test_is_login_route {
-    is_login_route with input as {"method": "GET", "path": ["login"]}
-}
-
 test_is_logout_route {
     is_logout_route with input as {"method": "POST", "path": ["logout"]}
 }
@@ -64,8 +60,12 @@ test_is_favicon_path {
     is_favicon_path with input as {"method": "GET", "path": ["favicon.ico"]}
 }
 
-test_allow_login_route {
-    allow with input as {"method": "GET", "path": ["login"]}
+test_allow_login_route_microsoft {
+    allow with input as {"method": "GET", "path": ["login", "microsoft"]}
+}
+
+test_allow_login_route_google {
+    allow with input as {"method": "GET", "path": ["login", "google"] }
 }
 
 test_allow_bank_account_route {

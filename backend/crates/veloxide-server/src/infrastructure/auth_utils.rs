@@ -1,18 +1,15 @@
-use chrono::Utc;
+use chrono::{DateTime, NaiveDateTime, Utc};
 
 use time::OffsetDateTime;
 use tower_cookies::{cookie::SameSite, Cookie, Cookies};
 
 use crate::infrastructure::{cryptography::*, middleware::error::AuthError};
 
-pub const AUTH_TOKEN_COOKIE_NAME: &str = "veloxide_auth_token";
-pub const AUTH_TOKEN_COOKIE_DOMAIN_ENV_VAR: &str = "AUTH_TOKEN_COOKIE_DOMAIN";
-pub const AUTH_TOKEN_COOKIE_HTTPS_ENV_VAR: &str = "HTTPS";
-pub const AUTH_TOKEN_COOKIE_DOMAIN_DEFAULT: &str = "veloxide.dev";
+use super::middleware::auth::auth_config;
 
 pub fn get_auth_token(cookies: &Cookies) -> Result<AuthToken, AuthError> {
     let auth_token = cookies
-        .get(AUTH_TOKEN_COOKIE_NAME)
+        .get(&auth_config().auth_token_configuration.cookie_name)
         .ok_or(AuthError::AuthTokenNotFound)?
         .value()
         .to_owned();
@@ -28,22 +25,16 @@ pub fn set_auth_cookie(
     token_value: &str,
     expiry: Option<chrono::DateTime<Utc>>,
 ) {
-    let mut cookie = Cookie::new(AUTH_TOKEN_COOKIE_NAME.to_owned(), token_value.to_owned());
+    let cookie_name = &auth_config().auth_token_configuration.cookie_name;
+    let mut cookie = Cookie::new(cookie_name, token_value.to_owned());
     if let Some(expiry) = expiry {
         cookie.set_expires(Some(convert_to_offsetdatetime(expiry)));
     };
     cookie.set_same_site(SameSite::None);
-    cookie.set_domain(
-        dotenvy::var(AUTH_TOKEN_COOKIE_DOMAIN_ENV_VAR)
-            .unwrap_or(AUTH_TOKEN_COOKIE_DOMAIN_DEFAULT.to_string()),
-    );
+    let domain = &auth_config().auth_token_configuration.cookie_domain;
+    cookie.set_domain(domain);
     cookie.set_http_only(true);
-    cookie.set_secure(
-        dotenvy::var(AUTH_TOKEN_COOKIE_HTTPS_ENV_VAR)
-            .unwrap_or("true".to_string())
-            .parse::<bool>()
-            .expect("expected to be able to parse HTTPS env var"),
-    );
+    cookie.set_secure(auth_config().auth_token_configuration.cookie_secure);
     cookie.set_path("/");
     cookies.add(cookie);
 }
@@ -55,30 +46,16 @@ pub fn convert_to_offsetdatetime(expiry: chrono::DateTime<Utc>) -> OffsetDateTim
 
 #[tracing::instrument(level = "debug", skip_all)]
 pub fn remove_auth_token_cookie(cookies: &Cookies) {
-    let mut cookie = Cookie::new(AUTH_TOKEN_COOKIE_NAME.to_owned(), "".to_owned());
-    cookie.set_expires(Some(
-        OffsetDateTime::from_unix_timestamp(0)
-            .expect("expected to be able to set epoch offset datetime"),
-    ));
-    cookie.set_same_site(SameSite::None);
-    cookie.set_domain(
-        dotenvy::var(AUTH_TOKEN_COOKIE_DOMAIN_ENV_VAR)
-            .unwrap_or(AUTH_TOKEN_COOKIE_DOMAIN_DEFAULT.to_string()),
+    let epoch: DateTime<Utc> = DateTime::from_utc(
+        NaiveDateTime::from_timestamp_opt(0, 0).expect("expected to be able to get epoch datetime"),
+        Utc,
     );
-    cookie.set_http_only(true);
-    cookie.set_secure(
-        dotenvy::var(AUTH_TOKEN_COOKIE_HTTPS_ENV_VAR)
-            .unwrap_or("true".to_string())
-            .parse::<bool>()
-            .expect("expected to be able to parse HTTPS env var"),
-    );
-    cookie.set_path("/");
-    cookies.add(cookie);
+    set_auth_cookie(cookies, "", Some(epoch))
 }
 
 pub fn get_user_token_cookie_value(cookies: &Cookies) -> Result<String, AuthError> {
     cookies
-        .get(AUTH_TOKEN_COOKIE_NAME)
+        .get(&auth_config().auth_token_configuration.cookie_name)
         .map(|cookie| cookie.value().to_string())
         .ok_or(AuthError::AuthTokenNotFound)
 }

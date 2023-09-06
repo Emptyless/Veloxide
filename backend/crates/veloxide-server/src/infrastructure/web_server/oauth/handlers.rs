@@ -179,15 +179,15 @@ pub struct AzureUser {
 }
 
 impl From<AzureUser> for User {
-    fn from(azure_user: AzureUser) -> Self {
+    fn from(microsoft_user: AzureUser) -> Self {
         Self {
             id: Uuid::new_v4(),
-            name: azure_user.name,
-            email: azure_user.email.as_str().to_string(),
+            name: microsoft_user.name,
+            email: microsoft_user.email.as_str().to_string(),
             verified_email: true,
-            given_name: azure_user.given_name,
-            family_name: azure_user.family_name,
-            picture: azure_user.picture,
+            given_name: microsoft_user.given_name,
+            family_name: microsoft_user.family_name,
+            picture: microsoft_user.picture,
             locale: "".to_string(),
             created_at: Utc::now(),
             updated_at: Utc::now(),
@@ -197,7 +197,7 @@ impl From<AzureUser> for User {
 }
 
 #[tracing::instrument()]
-pub async fn azure_oauth_callback_handler(
+pub async fn microsoft_oauth_callback_handler(
     Query(mut params): Query<HashMap<String, String>>,
     cookies: Cookies,
     Extension(mut oauth2_state_repo): Extension<OAuth2StateRepositoryImpl>,
@@ -225,7 +225,8 @@ pub async fn azure_oauth_callback_handler(
     let access_token = token_response.access_token().secret();
     let user_info_url = "https://graph.microsoft.com/oidc/userinfo";
     let client = reqwest::Client::new();
-    let body = client.get(user_info_url)
+    let body = client
+        .get(user_info_url)
         .header("Authorization", format!("Bearer {}", access_token))
         .send()
         .await
@@ -234,22 +235,22 @@ pub async fn azure_oauth_callback_handler(
         .await
         .map_err(|_| eyre!("OAuth: received invalid userinfo"))?;
 
-    let azure_user: AzureUser = serde_json::from_str(body.as_str())
+    let microsoft_user: AzureUser = serde_json::from_str(body.as_str())
         .map_err(|_| eyre!("OAuth: Serde failed to parse userinfo"))?;
 
     let user = match user_repo
-        .get_user_by_email(azure_user.email.as_str())
+        .get_user_by_email(microsoft_user.email.as_str())
         .await
     {
         Ok(user) => user,
         Err(_) => {
-            let user: User = azure_user.into();
+            let user: User = microsoft_user.into();
             user_repo.create_user(&user).await?;
             user
         }
     };
-    let key = &auth_config().token_key;
-    let auth_token: AuthToken = new_web_token(
+    let key = &auth_config().auth_token_configuration.token_key;
+    let auth_token = AuthToken::new(
         &user.email,
         Utc::now() + chrono::Duration::days(1),
         &user.token_salt.to_string(),
@@ -316,8 +317,8 @@ pub async fn google_oauth_callback_handler(
             user
         }
     };
-    let key = &auth_config().token_key;
-    let auth_token: AuthToken = new_web_token(
+    let key = &auth_config().auth_token_configuration.token_key;
+    let auth_token = AuthToken::new(
         &user.email,
         Utc::now() + chrono::Duration::days(1),
         &user.token_salt.to_string(),

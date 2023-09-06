@@ -1,8 +1,8 @@
 pub mod google;
 pub mod handlers;
 
-pub mod azure;
+pub mod microsoft;
 
 pub use google::*;
-pub use azure::*;
 pub use handlers::*;
+pub use microsoft::*;

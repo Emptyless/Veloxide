@@ -22,19 +22,14 @@ is_login_route {
     input.path == ["login", "google"]
 }
 
-is_login_route {
+is_login_route_microsoft {
     is_get_method
-    input.path == ["login", "azure"]
+    input.path == ["login", "microsoft"]
 }
 
 is_logout_route {
     is_post_method
-    input.path == ["logout", "google"]
-}
-
-is_logout_route {
-    is_post_method
-    input.path == ["logout", "azure"]
+    input.path == ["logout"]
 }
 
 is_protected_route {
@@ -59,7 +54,7 @@ is_callback_path {
 
 is_callback_path {
     is_get_method
-    input.path == ["auth", "azure", "callback"]
+    input.path == ["auth", "microsoft", "callback"]
 }
 
 is_root_path {
@@ -106,9 +101,12 @@ is_bank_account_path {
     input.path[1] == "bank-accounts"
 }
 
-# Main rule
 allow {
     is_login_route
+}
+
+allow {
+    is_login_route_microsoft
 }
 
 allow {

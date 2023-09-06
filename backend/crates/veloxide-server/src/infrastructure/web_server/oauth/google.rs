@@ -4,7 +4,6 @@ use oauth2::{
 
 // TODO: Make these not public
 
-pub const GOOGLE_OAUTH_ENABLED_ENV_VAR: &str = "GOOGLE_OAUTH_ENABLED";
 pub const GOOGLE_CLIENT_ID_ENV_VAR: &str = "GOOGLE_CLIENT_ID";
 pub const GOOGLE_CLIENT_SECRET_ENV_VAR: &str = "GOOGLE_CLIENT_SECRET";
 pub const GOOGLE_REDIRECT_URL_ENV_VAR: &str = "GOOGLE_REDIRECT_URL"; // example: http://localhost:8080/auth/google/callback
