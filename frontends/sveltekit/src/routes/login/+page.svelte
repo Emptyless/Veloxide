@@ -1,30 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import IconGoogle from '~icons/fa6-brands/google';
 	import { getContext } from 'svelte';
 	import { browser } from '$app/environment';
-	import { AUTH_SERVICE_LOGIN_URL } from '$lib/consts';
+    import MicrosoftLoginButton from '$lib/components/logins/MicrosoftLoginButton.svelte';
+    import GoogleLoginButton from '$lib/components/logins/GoogleLoginButton.svelte';
 	const user = getContext('user');
 	$: if (browser && typeof $user !== 'undefined') {
 		goto('/profile');
 	}
-
-	let returnUrl: string;
-	let loginUrl: string;
-	$: if (browser) {
-		returnUrl = encodeURIComponent(window.location.href);
-		loginUrl = `${AUTH_SERVICE_LOGIN_URL}?return_url=${returnUrl}`;
-	}
 </script>
 
 {#if !($user && typeof $user !== 'undefined')}
-	<div class="container h-full mx-auto justify-center items-center flex">
+	<div class="container mx-auto flex h-full items-center justify-center">
 		<div class="text-center">
-			<h3 class="font-bold h3 m-10">Choose your authentication provider</h3>
-			<a class="btn variant-filled" href={loginUrl}>
-				<IconGoogle />
-				<span class="hidden md:inline-block ml-2">Google</span>
-			</a>
+			<h3 class="h3 m-10 font-bold">Choose your authentication provider</h3>
+			<div class="grid grid-cols-1 items-center justify-items-center space-y-2">
+                <GoogleLoginButton />
+                <MicrosoftLoginButton />
+			</div>
 		</div>
 	</div>
 {/if}

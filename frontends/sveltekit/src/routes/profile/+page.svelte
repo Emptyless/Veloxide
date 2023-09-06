@@ -7,7 +7,7 @@
 	import { URLschema } from '$lib/utils';
 	const user: any | UserView = getContext('user');
 	import { browser } from '$app/environment';
-	import { AUTH_SERVICE_LOGOUT_URL, AUTH_TOKEN_COOKIE_DOMAIN } from '$lib/consts';
+	import { AUTH_SERVICE_LOGOUT_URL } from '$lib/consts';
 	import { Avatar } from '@skeletonlabs/skeleton';
 
 	onMount(() => {
@@ -24,6 +24,7 @@
 		initials = `${$user.givenName.charAt(0).toUpperCase()}${$user.familyName
 			.charAt(0)
 			.toUpperCase()}`;
+        console.log($user)
 	}
 
 	async function logout(): Promise<void> {

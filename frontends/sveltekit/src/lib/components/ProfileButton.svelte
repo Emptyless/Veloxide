@@ -1,26 +1,25 @@
 <script lang="ts">
 	import User from '~icons/fe/user';
-	import { browser } from '$app/environment';
 	import { popup, Avatar } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { URLschema } from '$lib/utils';
-	const popupFeatured: PopupSettings = {
+	const popupNotLoggedIn: PopupSettings = {
 		event: 'click',
-		target: 'popupFeatured',
+		target: 'popupNotLoggedIn',
+		placement: 'bottom'
+	};
+	const popupLoggedIn: PopupSettings = {
+		event: 'click',
+		target: 'popupLoggedIn',
 		placement: 'bottom'
 	};
 	import { getContext } from 'svelte';
-	import { AUTH_SERVICE_LOGOUT_URL, AUTH_SERVICE_LOGIN_URL } from '$lib/consts';
+	import { AUTH_SERVICE_LOGOUT_URL } from '$lib/consts';
 	import type { UserView } from '$lib/stubs/auth';
 	import { goto } from '$app/navigation';
+	import GoogleLoginButton from './logins/GoogleLoginButton.svelte';
+	import MicrosoftLoginButton from './logins/MicrosoftLoginButton.svelte';
 	const user: any | UserView = getContext('user');
-	let returnUrl: string;
-	let loginUrl: string;
-	$: if (browser) {
-		returnUrl = encodeURIComponent(window.location.href);
-		loginUrl = `${AUTH_SERVICE_LOGIN_URL}?return_url=${returnUrl}`;
-	}
-
 	let initials: string;
 	$: if ($user && typeof $user !== 'undefined') {
 		initials = `${$user.givenName.charAt(0).toUpperCase()}${$user.familyName
@@ -48,10 +47,10 @@
 		id="profile-desktop"
 		aria-label="profile"
 		class="btn-icon btn-icon-sm hidden md:inline-block"
-		use:popup={popupFeatured}
+		use:popup={popupLoggedIn}
 	>
 		{#if $user.picture && URLschema.safeParse($user.picture).success}
-			<Avatar src={$user.picture} class="w-full h-full" {initials} />
+			<Avatar src={$user.picture} class="h-full w-full" {initials} />
 		{:else}
 			<User style="font-size: 1.5em" />
 		{/if}
@@ -64,23 +63,23 @@
 		class="btn-icon btn-icon-sm md:hidden"
 	>
 		{#if $user.picture && URLschema.safeParse($user.picture).success}
-			<Avatar src={$user.picture} class="w-full h-full" {initials} />
+			<Avatar src={$user.picture} class="h-full w-full" {initials} />
 		{:else}
 			<User style="font-size: 1.5em" />
 		{/if}
 	</a>
 	<!-- Popup on desktop -->
-	<div class="card p-4 w-72 shadow-xl" data-popup="popupFeatured">
+	<div class="card w-72 p-4 shadow-xl" data-popup="popupLoggedIn">
 		<div class="space-y-4">
 			<a href="/profile" aria-label="Profile">
 				<figure
-					class="avatar flex aspect-square text-surface-50 font-semibold justify-center items-center overflow-hidden isolate bg-surface-400-500-token w-16 rounded-full"
+					class="avatar bg-surface-400-500-token isolate flex aspect-square w-16 items-center justify-center overflow-hidden rounded-full font-semibold text-surface-50"
 					data-testid="avatar"
 				>
 					{#if $user.picture && URLschema.safeParse($user.picture).success}
-						<Avatar src={$user.picture} class="w-full h-full" />
+						<Avatar src={$user.picture} class="h-full w-full" />
 					{:else}
-						<User class="avatar-image w-full h-full object-cover" />
+						<User class="avatar-image h-full w-full object-cover" />
 					{/if}
 				</figure>
 			</a>
@@ -92,8 +91,31 @@
 		</div>
 	</div>
 {:else}
-	<a class="btn btn-sm variant-soft" href={loginUrl} aria-label="Login">
-		<User class="w-5 h-5" />
+	<!-- Button for desktop -->
+	<button
+		id="profile-desktop"
+		aria-label="profile"
+		class="btn btn-sm variant-soft hidden md:inline-block"
+		use:popup={popupNotLoggedIn}
+	>
+		<User class="w-5 h-5 hidden md:inline-block" />
 		<span class="hidden md:inline-block ml-2">Login</span>
+	</button>
+	<!-- Button for mobile -->
+	<a
+		href="/profile"
+		id="profile-mobile"
+		aria-label="profile"
+		class="btn-icon btn-icon-sm md:hidden"
+	>
+		<User style="font-size: 1.5em" />
 	</a>
+	<!-- Popup on desktop -->
+	<div class="card w-72 p-4 shadow-xl" data-popup="popupNotLoggedIn">
+		<div class="grid grid-cols-1 items-center justify-items-center space-y-2">
+			<span class="m-4 text-center h4 font-bold">Choose your authentication provider</span>
+			<GoogleLoginButton />
+			<MicrosoftLoginButton />
+		</div>
+	</div>
 {/if}

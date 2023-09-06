@@ -6,8 +6,9 @@ if (typeof authServiceRestBaseUrl === undefined || !authServiceRestBaseUrl) {
 const formattedBaseUrl: string = authServiceRestBaseUrl.endsWith('/')
 	? authServiceRestBaseUrl.slice(0, -1)
 	: authServiceRestBaseUrl;
-export const AUTH_SERVICE_LOGOUT_URL: string = `${formattedBaseUrl}/logout`;
-export const AUTH_SERVICE_LOGIN_URL: string = `${formattedBaseUrl}/login`;
-export const AUTH_TOKEN_COOKIE_NAME: string = 'veloxide_auth_token';
+export const AUTH_SERVICE_LOGOUT_URL = `${formattedBaseUrl}/logout`;
+export const AUTH_SERVICE_GOOGLE_LOGIN_URL = `${formattedBaseUrl}/login/google`;
+export const AUTH_SERVICE_MICROSOFT_LOGIN_URL = `${formattedBaseUrl}/login/microsoft`;
+export const AUTH_TOKEN_COOKIE_NAME = 'veloxide_auth_token';
 export const AUTH_TOKEN_COOKIE_DOMAIN: string =
 	import.meta.env.VITE_AUTH_TOKEN_COOKIE_DOMAIN || 'veloxide.dev';
