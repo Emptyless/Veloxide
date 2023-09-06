@@ -19,9 +19,12 @@ HTTP_PORT = "8080"
 AUTHZ_ENABLED = "false"
 GRAPHQL_ENABLED = "false"
 GOOGLE_REDIRECT_URL = "https://api.examplebanking.veloxide.dev/auth/google/callback"
+MICROSOFT_REDIRECT_URL = "http://api.examplebanking.veloxide.dev/auth/microsoft/callback"
 FRONTEND_CLIENT_ORIGIN = "https://beta.examplebanking.veloxide.dev"
 AUTH_TOKEN_COOKIE_DOMAIN = ".examplebanking.veloxide.dev"
 HTTPS = "true"
+MICROSOFT_OAUTH_ENABLED = "true"
+GOOGLE_OAUTH_ENABLED = "true"
 
 [[services]]
 protocol = "tcp"
